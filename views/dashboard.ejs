@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>index</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="table.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+  </head>
+  <body>
+    <header class="header">
+      <nav>
+        <ul>
+            <li style="width: 5%; margin-top: px;" >
+                <span style="cursor: pointer; font-size: 26px;" onclick="openNav()"> &#9776</span>
+              </li>
+          <li style=" margin:0px auto; width: 85%;">
+            
+            <form action="/search" style="margin: 0 auto;">
+              <input
+                type="search"
+                class="searchBar"
+                name="product";
+                width="100%"
+              />
+              <select name="searchBy" class="searchBar">
+                <option value="title" class="searchBar">Product Title</option>
+                <option value="id" class="searchBar">Product ID</option>
+              </select>
+
+            </form>
+          </li>
+          <li style="width: 3%; float: right; margin-right: 15px;">
+            <a href="logout"><i class="fa fa-sign-out" style="font-size: 25px;"></i></a>
+          </li>
+          <li style="width: 3%; float: right; margin-right: 15px;" >
+          <a href="cart"><i class="fa fa-shopping-cart" style="font-size: 25px;"></i></a>
+        </li>
+          
+        </ul>
+      </nav>
+    </header>
+  
+      <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
+          >&times;</a
+        >
+        <a href="index.html"> Home </a>
+        <a href="dashboard"> Dashboard </a>
+        <a href="product.html"> Product </a>
+        <a href="invoice.html"> Invoice </a>
+        <a href="vendor.html"> Vendor </a>
+        <a href="purchaseOrder.html"> Purchase Order </a>
+        <a href="tag">Create Tags</a>
+        <a href="vendorPage">Create Vendor</a>
+        
+        <a href="upload.html">Upload </a>
+        
+      </div>
+
+<h1>Company</h1>
+<div>
+<canvas
+      class="salesChart"
+      id="this"
+      style="max-width: 90%; max-height: 500px; height: 400px; margin: 10px 70px 70px"
+    >
+    </canvas>
+  </div>
+<div class="table-wrapper" >
+    <table class="fl-table">
+      <tr>
+        <th>Year</th>
+        <th id="last"></th>
+        <th id="current"></th>
+      </tr>
+      <tr>
+        <td>Annual SKUs</td>
+        <td id="purchaseCountLast">0</td>
+        <td id="purchaseCount"></td>
+      </tr>
+      <tr>
+        <td>Annual Purchase Quantity</td>
+        <td id="purchaseUnitsLast">0</td>
+        <td id="purchaseUnits"></td>
+      </tr>
+      <tr>
+        <td>Annual Purchase Amount</td>
+        <td id="purchaseAmountLast">0</td>
+        <td id="purchaseAmount"></td>
+      </tr>
+      <tr>
+        <td>Annual SKUs Sold</td>
+        <td id="soldCountLast">0</td>
+        <td id="soldUnitsCount"></td>
+      </tr>
+      <tr>
+        <td>Annual Sold Quantity</td>
+        <td id="soldUnitsLast">0</td>
+        <td id="soldUnits"></td>
+      </tr>
+      <tr>
+        <td>Annual GMS</td>
+        <td id="gmsLast">0</td>
+        <td id="gms"></td>
+      </tr>
+      <tr>
+        <td>Annual Profit</td>
+        <td id="profitLast">0</td>
+        <td id="profit"></td>
+      </tr>
+      <tr>
+        <td>Annual Margin</td>
+        <td id="marginLast">0</td>
+        <td id="margin"></td>
+      </tr>
+      <tr>
+        <td>SKUs On Hand</td>
+        <td>0</td>
+        <td id="sku"></td>
+      </tr>
+      <tr>
+        <td>Inventory On Hand</td>
+        <td>0</td>
+        <td id="inventory"></td>
+      </tr>
+    </table>
+    
+  </div>
+
+    
+
+    <h2 style="padding-top: 100px">Sales Table</h2>
+    <div class="table-wrapper">
+    <table class="fl-table">
+      <tr>
+        <th>This Year</th>
+        <th>Jan</th>
+        <th>Feb</th>
+        <th>Mar</th>
+        <th>Apr</th>
+        <th>May</th>
+        <th>Jun</th>
+        <th>Jul</th>
+        <th>Aug</th>
+        <th>Sep</th>
+        <th>Oct</th>
+        <th>Nov</th>
+        <th>Dec</th>
+      </tr>
+      <tr>
+        <td>SKUs</td>
+        <td id="sku1">0</td>
+        <td id="sku2">0</td>
+        <td id="sku3">0</td>
+        <td id="sku4">0</td>
+        <td id="sku5">0</td>
+        <td id="sku6">0</td>
+        <td id="sku7">0</td>
+        <td id="sku8">0</td>
+        <td id="sku9">0</td>
+        <td id="sku10">0</td>
+        <td id="sku11">0</td>
+        <td id="sku12">0</td>
+      </tr>
+      <tr>
+        <td>Quantity</td>
+        <td id="units1">0</td>
+        <td id="units2">0</td>
+        <td id="units3">0</td>
+        <td id="units4">0</td>
+        <td id="units5">0</td>
+        <td id="units6">0</td>
+        <td id="units7">0</td>
+        <td id="units8">0</td>
+        <td id="units9">0</td>
+        <td id="units10">0</td>
+        <td id="units11">0</td>
+        <td id="units12">0</td>
+      </tr>
+      <tr>
+        <td>GMS</td>
+        <td id="gms1">0</td>
+        <td id="gms2">0</td>
+        <td id="gms3">0</td>
+        <td id="gms4">0</td>
+        <td id="gms5">0</td>
+        <td id="gms6">0</td>
+        <td id="gms7">0</td>
+        <td id="gms8">0</td>
+        <td id="gms9">0</td>
+        <td id="gms10">0</td>
+        <td id="gms11">0</td>
+        <td id="gms12">0</td>
+      </tr>
+      <tr>
+        <td>Profit</td>
+        <td id="profit1">0</td>
+        <td id="profit2">0</td>
+        <td id="profit3">0</td>
+        <td id="profit4">0</td>
+        <td id="profit5">0</td>
+        <td id="profit6">0</td>
+        <td id="profit7">0</td>
+        <td id="profit8">0</td>
+        <td id="profit9">0</td>
+        <td id="profit10">0</td>
+        <td id="profit11">0</td>
+        <td id="profit12">0</td>
+      </tr>
+      <tr>
+        <td>Margin</td>
+        <td id="margin1">0</td>
+        <td id="margin2">0</td>
+        <td id="margin3">0</td>
+        <td id="margin4">0</td>
+        <td id="margin5">0</td>
+        <td id="margin6">0</td>
+        <td id="margin7">0</td>
+        <td id="margin8">0</td>
+        <td id="margin9">0</td>
+        <td id="margin10">0</td>
+        <td id="margin11">0</td>
+        <td id="margin12">0</td>
+      </tr>
+    </table>
+  </div>
+  <div class="table-wrapper">
+    <table class="fl-table">
+      <tr>
+        <th>Last Year</th>
+        <th>Jan</th>
+        <th>Feb</th>
+        <th>Mar</th>
+        <th>Apr</th>
+        <th>May</th>
+        <th>Jun</th>
+        <th>Jul</th>
+        <th>Aug</th>
+        <th>Sep</th>
+        <th>Oct</th>
+        <th>Nov</th>
+        <th>Dec</th>
+      </tr>
+      <tr>
+        <td>SKUs</td>
+        <td id="lsku1">0</td>
+        <td id="lsku2">0</td>
+        <td id="lsku3">0</td>
+        <td id="lsku4">0</td>
+        <td id="lsku5">0</td>
+        <td id="lsku6">0</td>
+        <td id="lsku7">0</td>
+        <td id="lsku8">0</td>
+        <td id="lsku9">0</td>
+        <td id="lsku10">0</td>
+        <td id="lsku11">0</td>
+        <td id="lsku12">0</td>
+      </tr>
+      <tr>
+        <td>Quantity</td>
+        <td id="lunits1">0</td>
+        <td id="lunits2">0</td>
+        <td id="lunits3">0</td>
+        <td id="lunits4">0</td>
+        <td id="lunits5">0</td>
+        <td id="lunits6">0</td>
+        <td id="lunits7">0</td>
+        <td id="lunits8">0</td>
+        <td id="lunits9">0</td>
+        <td id="lunits10">0</td>
+        <td id="lunits11">0</td>
+        <td id="lunits12">0</td>
+      </tr>
+      <tr>
+        <td>GMS</td>
+        <td id="lgms1">0</td>
+        <td id="lgms2">0</td>
+        <td id="lgms3">0</td>
+        <td id="lgms4">0</td>
+        <td id="lgms5">0</td>
+        <td id="lgms6">0</td>
+        <td id="lgms7">0</td>
+        <td id="lgms8">0</td>
+        <td id="lgms9">0</td>
+        <td id="lgms10">0</td>
+        <td id="lgms11">0</td>
+        <td id="lgms12">0</td>
+      </tr>
+      <tr>
+        <td>Profit</td>
+        <td id="lprofit1">0</td>
+        <td id="lprofit2">0</td>
+        <td id="lprofit3">0</td>
+        <td id="lprofit4">0</td>
+        <td id="lprofit5">0</td>
+        <td id="lprofit6">0</td>
+        <td id="lprofit7">0</td>
+        <td id="lprofit8">0</td>
+        <td id="lprofit9">0</td>
+        <td id="lprofit10">0</td>
+        <td id="lprofit11">0</td>
+        <td id="lprofit12">0</td>
+      </tr>
+      <tr>
+        <td>Margin</td>
+        <td id="lmargin1">0</td>
+        <td id="lmargin2">0</td>
+        <td id="lmargin3">0</td>
+        <td id="lmargin4">0</td>
+        <td id="lmargin5">0</td>
+        <td id="lmargin6">0</td>
+        <td id="lmargin7">0</td>
+        <td id="lmargin8">0</td>
+        <td id="lmargin9">0</td>
+        <td id="lmargin10">0</td>
+        <td id="lmargin11">0</td>
+        <td id="lmargin12">0</td>
+      </tr>
+    </table>
+  </div>
+  <h2 style="padding-top: 100px">Purchase Table</h2>
+  
+  <div class="table-wrapper">
+    <table class="fl-table">
+      <tr>
+        <th>This Year</th>
+        <th>Jan</th>
+        <th>Feb</th>
+        <th>Mar</th>
+        <th>Apr</th>
+        <th>May</th>
+        <th>Jun</th>
+        <th>Jul</th>
+        <th>Aug</th>
+        <th>Sep</th>
+        <th>Oct</th>
+        <th>Nov</th>
+        <th>Dec</th>
+      </tr>
+      <tr>
+        <td>SKUs</td>
+        <td id="psku1">0</td>
+        <td id="psku2">0</td>
+        <td id="psku3">0</td>
+        <td id="psku4">0</td>
+        <td id="psku5">0</td>
+        <td id="psku6">0</td>
+        <td id="psku7">0</td>
+        <td id="psku8">0</td>
+        <td id="psku9">0</td>
+        <td id="psku10">0</td>
+        <td id="psku11">0</td>
+        <td id="psku12">0</td>
+      </tr>
+      <tr>
+        <td>Quantity</td>
+        <td id="punits1">0</td>
+        <td id="punits2">0</td>
+        <td id="punits3">0</td>
+        <td id="punits4">0</td>
+        <td id="punits5">0</td>
+        <td id="punits6">0</td>
+        <td id="punits7">0</td>
+        <td id="punits8">0</td>
+        <td id="punits9">0</td>
+        <td id="punits10">0</td>
+        <td id="punits11">0</td>
+        <td id="punits12">0</td>
+      </tr>
+      <tr>
+        <td>Amount</td>
+        <td id="pamount1">0</td>
+        <td id="pamount2">0</td>
+        <td id="pamount3">0</td>
+        <td id="pamount4">0</td>
+        <td id="pamount5">0</td>
+        <td id="pamount6">0</td>
+        <td id="pamount7">0</td>
+        <td id="pamount8">0</td>
+        <td id="pamount9">0</td>
+        <td id="pamount10">0</td>
+        <td id="pamount11">0</td>
+        <td id="pamount12">0</td>
+      </tr>
+    </table>
+  </div>
+  <div class="table-wrapper">
+    <table class="fl-table">
+      <tr>
+        <th>Last Year</th>
+        <th>Jan</th>
+        <th>Feb</th>
+        <th>Mar</th>
+        <th>Apr</th>
+        <th>May</th>
+        <th>Jun</th>
+        <th>Jul</th>
+        <th>Aug</th>
+        <th>Sep</th>
+        <th>Oct</th>
+        <th>Nov</th>
+        <th>Dec</th>
+      </tr>
+      <tr>
+        <td>SKUs</td>
+        <td id="lpsku1">0</td>
+        <td id="lpsku2">0</td>
+        <td id="lpsku3">0</td>
+        <td id="lpsku4">0</td>
+        <td id="lpsku5">0</td>
+        <td id="lpsku6">0</td>
+        <td id="lpsku7">0</td>
+        <td id="lpsku8">0</td>
+        <td id="lpsku9">0</td>
+        <td id="lpsku10">0</td>
+        <td id="lpsku11">0</td>
+        <td id="lpsku12">0</td>
+      </tr>
+      <tr>
+        <td>Quantity</td>
+        <td id="lpunits1">0</td>
+        <td id="lpunits2">0</td>
+        <td id="lpunits3">0</td>
+        <td id="lpunits4">0</td>
+        <td id="lpunits5">0</td>
+        <td id="lpunits6">0</td>
+        <td id="lpunits7">0</td>
+        <td id="lpunits8">0</td>
+        <td id="lpunits9">0</td>
+        <td id="lpunits10">0</td>
+        <td id="lpunits11">0</td>
+        <td id="lpunits12">0</td>
+      </tr>
+      <tr>
+        <td>Amount</td>
+        <td id="lpamount1">0</td>
+        <td id="lpamount2">0</td>
+        <td id="lpamount3">0</td>
+        <td id="lpamount4">0</td>
+        <td id="lpamount5">0</td>
+        <td id="lpamount6">0</td>
+        <td id="lpamount7">0</td>
+        <td id="lpamount8">0</td>
+        <td id="lpamount9">0</td>
+        <td id="lpamount10">0</td>
+        <td id="lpamount11">0</td>
+        <td id="lpamount12">0</td>
+      </tr>
+    </table>
+  </div>
+  <script src="/script/navBar.js"></script>
+<script src="/script/dashboard.js"></script>
+  </body>
+</html>
