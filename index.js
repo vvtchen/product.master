@@ -801,9 +801,9 @@ app.get("/invoice", (req, res) => {
   const status = req.query.status;
   let query;
   if (vendor === "all") {
-    query = `select distinct(invoice_id), status, vendorName, po_id from invoice WHERE status = '${status}'`;
+    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice WHERE status = '${status}'`;
   } else {
-    query = `select distinct(invoice_id), status, vendorName, po_id from invoice where status = '${status}' and vendorName = '${vendor}'`;
+    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice where status = '${status}' and vendorName = '${vendor}'`;
   }
   con.query(query, (err, result) => {
     if (err) throw err;
@@ -815,7 +815,7 @@ app.get("/invoice", (req, res) => {
 
 app.get("/invoiceDetail", (req, res) => {
   const id = req.query.id;
-  const query = `select invoice.invoice_id, invoice.vendorName,invoice.po_id, invoice.product_id, invoice.purchaseUnits, invoice.purchasePrice, invoice.status,PO.modelNO, PO.vendorPrice as po_price, PO.quantity as po_quantity from invoice inner join PO where invoice.invoice_id = '${id}' and invoice.po_id = PO.id and invoice.product_id = PO.product_id;`;
+  const query = `select invoice.invoice_id, invoice.vendorName,invoice.po_id, invoice.product_id, invoice.purchaseUnits, invoice.purchasePrice,(invoice.purchaseUnits - invoice.soldUnits)as salesStatus, invoice.status, date_format(invoice_date, "%Y/%m/%d") as date, PO.modelNO, PO.vendorPrice as po_price, PO.quantity as po_quantity from invoice inner join PO where invoice.invoice_id = '${id}' and invoice.po_id = PO.id and invoice.product_id = PO.product_id;`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.render("invoiceDetail", { result });

@@ -25,3 +25,45 @@ function count() {
   document.getElementById("amount").innerHTML = `$${amount}`;
 }
 count();
+
+const filter = (ele) => {
+  const inventory = document.getElementsByClassName("inventory");
+  if (ele.id == "hide") {
+    for (let product of inventory) {
+      const units = Number(product.textContent);
+      const row = product.closest("tr");
+      if (units === 0) {
+        row.style.display = "none";
+      }
+    }
+    ele.id = "show";
+    ele.textContent = "Show All";
+  } else if (ele.id == "show") {
+    for (let product of inventory) {
+      const units = Number(product.textContent);
+      const row = product.closest("tr");
+      if (units === 0) {
+        row.style.display = "table-row";
+      }
+    }
+    ele.id = "hide";
+    ele.textContent = "Only show on hand";
+  }
+};
+
+const alert = () => {
+  const units = document.getElementsByClassName("unitsDiff");
+  const price = document.getElementsByClassName("priceDiff");
+  for (let unit of units) {
+    if (Number(unit.textContent) != 0) {
+      unit.style.color = "red";
+    }
+  }
+  for (let p of price) {
+    if (Number(p.textContent) > 0) {
+      p.style.color = "red";
+    }
+  }
+};
+
+alert();

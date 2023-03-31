@@ -64,24 +64,30 @@
     <h1>Purchase Order List</h1>
     <div class="table-wrapper">
       <table class="fl-table">
+        <button id="hide" onclick="filter(this)" style="float: right;color: #2564cf;
+        width: 230px;
+        margin-left: 0px;
+        height: 30px;
+        font-weight: bold;">Only Show Delay Order</button>
       <tr>
-        <th>Vendor</th>
         <th>PO Number</th>
         <th>Invoice Number</th>
+        <th>Vendor</th>
         <th>ETA</th>
         <th>Status</th>
       </tr>
       <% for (info of result){ %>
       <tr>
-        <td><%= info.vendorName %></td>
         <td><a href="/poDetail?id=<%= info.id %>"> <%= info.id %> </a></td>
         <td><%= info.invoiceID %></td>
-        <td><%= info.ETA %></td>
-        <td><%= info.status %></td>
+        <td><%= info.vendorName %></td>
+        <td class="eta"><%= info.ETA %></td>
+        <td class="status"><%= info.status %></td>
       </tr>
       <% } %>
     </table>
     </div>
   </body>
   <script src="/script/navBar.js"></script>
+  <script src="/script/po.js"></script>
 </html>

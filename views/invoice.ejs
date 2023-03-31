@@ -68,6 +68,7 @@
         <th>Vendor</th>
         <th>PO Number</th>
         <th>Invoice Number</th>
+        <th>Invoice Date</th>
         <th>Status</th>
       </tr>
       <% for (info of result){ %>
@@ -79,6 +80,7 @@
             ><%= info.invoice_id %>
           </a>
         </td>
+        <td><%= info.date %></td>
         <td><%= info.status %></td>
       </tr>
       <% } %>
