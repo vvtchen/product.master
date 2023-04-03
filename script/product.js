@@ -228,7 +228,7 @@ async function change(ele) {
     product_id: `${ele.value}`,
   };
   await fetch("/modifyProduct", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
@@ -285,12 +285,7 @@ async function get(ele) {
 
 //get incoming
 async function getIncoming(ele) {
-  const data = { id: ele.value };
-  const result = await fetch("/getIncoming", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const result = await fetch(`/getIncoming?id=${ele.value}`);
   const res = await result.json();
   const tableID = `table${ele.value}`;
   const content = document.getElementById(tableID);
@@ -317,7 +312,7 @@ async function add(element) {
     return;
   }
   const response = await fetch("/addToCart", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
@@ -346,7 +341,7 @@ async function setPrice(element) {
     return;
   }
   const response = await fetch("/priceUpdate", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data2),
   });

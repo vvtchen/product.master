@@ -70,6 +70,7 @@
         <th>Invoice Number</th>
         <th>Invoice Date</th>
         <th>Status</th>
+        <th>Profit</th>
       </tr>
       <% for (info of result){ %>
       <tr>
@@ -82,6 +83,7 @@
         </td>
         <td><%= info.date %></td>
         <td><%= info.status %></td>
+        <td>$<%= info.profit %></td>
       </tr>
       <% } %>
     </table>

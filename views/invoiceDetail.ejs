@@ -76,6 +76,7 @@
     <h4>SKU: <small id="sku"></small></h4>
     <h4>Quantity: <small id="quantity"></small></h4>
     <h4>Amount: <small id="amount"></small></h4>
+    <h4>Profit: <small id="profit"></small></h4>
     <div class="input-group">
     <button onclick="verify(this)" value="<%= result[0].invoice_id %>">
       Verify
@@ -97,6 +98,7 @@
         <th>Quantity Difference</th>
         <th>Price Difference</th>
         <th>On Hand</th>
+        <th>Profit</th>
       </tr>
       <% for (info of result){ %>
       <tr class="rowData">
@@ -109,6 +111,7 @@
         <td class="unitsDiff"><%= info.purchaseUnits - info.po_quantity %></td>
         <td class="priceDiff"><%= info.purchasePrice - info.po_price %></td>
         <td class="inventory"><%= info.salesStatus %></td>
+        <td class="profit">$<%= info.profit %></td>
       </tr>
       <% } %>
     </table>

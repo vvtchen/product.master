@@ -67,3 +67,19 @@ const alert = () => {
 };
 
 alert();
+
+const totalProfit = () => {
+  const total = document.getElementsByClassName("profit");
+  var profit = 0;
+  for (let i of total) {
+    profit += Number(i.textContent.slice(1));
+  }
+  document.getElementById("profit").innerHTML = `$${profit}`;
+  if (profit < 0) {
+    document.getElementById("profit").style.color = "red";
+  } else if (profit > 0) {
+    document.getElementById("profit").style.color = "green";
+  }
+};
+
+totalProfit();

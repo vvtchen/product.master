@@ -241,7 +241,13 @@ app.post(
     let signal = await checkValid(__dirname + "/uploads/" + req.file.filename);
     if (signal) {
       importFileToDb(__dirname + "/uploads/" + req.file.filename);
+      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
+        console.log(err);
+      });
     } else {
+      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
+        console.log(err);
+      });
       res.render("importProductError", {
         errorMessage: "Error Template Format",
       });
@@ -267,14 +273,24 @@ app.post(
             if (quantity <= result.inventory) {
               cogs += quantity * result.purchasePrice;
               row.push(row[3] * row[4] - cogs);
-              const update = `update invoice set soldUnits = soldUnits + ${quantity} where invoice_id = '${result.invoice_id}' and product_id = '${id}'`;
+              const update = `update invoice set soldUnits = soldUnits + ${quantity}, profit = profit + ${
+                quantity * row[3]
+              } where invoice_id = '${
+                result.invoice_id
+              }' and product_id = '${id}'`;
               con.query(update, (err, data) => {
                 if (err) throw err;
               });
               break;
             } else {
               cogs += result.inventory * result.purchasePrice;
-              const update = `update invoice set soldUnits = soldUnits + ${result.inventory} where invoice_id = '${result.invoice_id}' and product_id = '${id}'`;
+              const update = `update invoice set soldUnits = soldUnits + ${
+                result.inventory
+              }, profit = profit + ${
+                result.inventory * row[3]
+              } where invoice_id = '${
+                result.invoice_id
+              }' and product_id = '${id}'`;
               con.query(update, (err, data) => {
                 if (err) throw err;
               });
@@ -328,7 +344,13 @@ app.post(
     let signal = await checkValid(__dirname + "/uploads/" + req.file.filename);
     if (signal) {
       importSales(__dirname + "/uploads/" + req.file.filename);
+      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
+        console.log(err);
+      });
     } else {
+      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
+        console.log(err);
+      });
       res.render("importSalesError", { errorMessage: "Error Template Format" });
     }
   }
@@ -429,7 +451,13 @@ app.post(
     let signal = await checkValid(__dirname + "/uploads/" + req.file.filename);
     if (signal) {
       importInvoice(__dirname + "/uploads/" + req.file.filename);
+      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
+        console.log(err);
+      });
     } else {
+      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
+        console.log(err);
+      });
       res.render("importInvoiceError", {
         errorMessage: "Error Template Format",
       });
@@ -438,7 +466,7 @@ app.post(
 );
 
 //add to cart
-app.post("/addToCart", async (req, res, next) => {
+app.put("/addToCart", (req, res) => {
   const data = req.body;
   const id = data.product_id;
   const quantity = data.quantity;
@@ -547,7 +575,7 @@ app.get("/product", (req, res, next) => {
 });
 
 //update price
-app.post("/priceUpdate", (req, res) => {
+app.put("/priceUpdate", (req, res) => {
   const data = req.body;
   const product_id = data.product_id;
   const price = data.sellPrice;
@@ -801,9 +829,9 @@ app.get("/invoice", (req, res) => {
   const status = req.query.status;
   let query;
   if (vendor === "all") {
-    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice WHERE status = '${status}'`;
+    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id, (profit - purchaseUnits*purchasePrice) as profit from invoice WHERE status = '${status}'`;
   } else {
-    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice where status = '${status}' and vendorName = '${vendor}'`;
+    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id, (profit - purchaseUnits*purchasePrice) as profit from invoice where status = '${status}' and vendorName = '${vendor}'`;
   }
   con.query(query, (err, result) => {
     if (err) throw err;
@@ -815,7 +843,7 @@ app.get("/invoice", (req, res) => {
 
 app.get("/invoiceDetail", (req, res) => {
   const id = req.query.id;
-  const query = `select invoice.invoice_id, invoice.vendorName,invoice.po_id, invoice.product_id, invoice.purchaseUnits, invoice.purchasePrice,(invoice.purchaseUnits - invoice.soldUnits)as salesStatus, invoice.status, date_format(invoice_date, "%Y/%m/%d") as date, PO.modelNO, PO.vendorPrice as po_price, PO.quantity as po_quantity from invoice inner join PO where invoice.invoice_id = '${id}' and invoice.po_id = PO.id and invoice.product_id = PO.product_id;`;
+  const query = `select invoice.invoice_id, invoice.vendorName,invoice.po_id, invoice.product_id, invoice.purchaseUnits, invoice.purchasePrice,(invoice.purchaseUnits - invoice.soldUnits)as salesStatus, invoice.status, date_format(invoice_date, "%Y/%m/%d") as date, (invoice.profit - invoice.purchaseUnits*invoice.purchasePrice) as profit, PO.modelNO, PO.vendorPrice as po_price, PO.quantity as po_quantity from invoice inner join PO where invoice.invoice_id = '${id}' and invoice.po_id = PO.id and invoice.product_id = PO.product_id;`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.render("invoiceDetail", { result });
@@ -912,8 +940,8 @@ app.get("/vendor", (req, res) => {
 });
 
 //get incoming info
-app.post("/getIncoming", (req, res) => {
-  const id = req.body.id;
+app.get("/getIncoming", (req, res) => {
+  const id = req.query.id;
   const query = `SELECT id, modelNO, quantity, status, date_format(ETA, "%Y/%m/%d") as ETA, vendorName FROM PO WHERE product_id = ${id} AND status = 'not receive'`;
   con.query(query, (err, data) => {
     if (err) throw err;
@@ -933,7 +961,7 @@ app.post("/remark", (req, res) => {
 });
 
 //modify productInfo
-app.post("/modifyProduct", (req, res) => {
+app.put("/modifyProduct", (req, res) => {
   const vendorPrice = req.body.vendorPrice;
   const packageNo = req.body.packageNo;
   const packageCost = req.body.packageCost;
