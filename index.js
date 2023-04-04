@@ -199,6 +199,11 @@ app.post(
     function importFileToDb(exFile) {
       readXlsxFile(exFile).then(async (rows) => {
         rows.shift();
+        if (rows.length == 0) {
+          return res.render("importProductError", {
+            errorMessage: "Can't find any data",
+          });
+        }
 
         const checkExist = await Query(
           `Select vendorName from vendor where vendorName = '${rows[0][0]}'`
@@ -222,7 +227,7 @@ app.post(
     }
     async function checkValid(exFile) {
       let result = true;
-      let rows = await readXlsxFile(exFile); // Wait for the file to be read
+      let rows = await readXlsxFile(exFile);
       rows.shift();
       for (let i = 0; i < rows.length; i++) {
         if (rows[i].length !== 8) {
@@ -263,6 +268,11 @@ app.post(
     function importSales(exFile) {
       readXlsxFile(exFile).then(async (rows) => {
         rows.shift();
+        if (rows.length == 0) {
+          return res.render("importProductError", {
+            errorMessage: "Can't find any data",
+          });
+        }
         for (let row of rows) {
           let id = row[1];
           let quantity = row[4];
@@ -386,6 +396,11 @@ app.post(
     function importInvoice(exFile) {
       readXlsxFile(exFile).then((rows) => {
         rows.shift();
+        if (rows.length == 0) {
+          return res.render("importProductError", {
+            errorMessage: "Can't find any data",
+          });
+        }
         con.connect(async (error) => {
           if (error) {
             console.error(error);
