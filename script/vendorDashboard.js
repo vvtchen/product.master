@@ -10,8 +10,6 @@ async function chart() {
     `/dbChartSalesVendor?year=${year - 1}&vendor=${vendor}`
   );
   const lastSalesData = await lastSales.json();
-  console.log(salesData);
-  console.log(lastSalesData);
   const invoice = await fetch(
     `/dbChartInvoiceVendor?year=${year}&vendor=${vendor}`
   );
@@ -20,8 +18,6 @@ async function chart() {
     `/dbChartInvoiceVendor?year=${year - 1}&vendor=${vendor}`
   );
   const lastInvoiceData = await lastInvoice.json();
-  console.log(invoiceData);
-  console.log(lastInvoiceData);
   const xValues = [
     "Jan",
     "Feb",
@@ -244,3 +240,34 @@ async function getThisYear() {
       salesDataLast[0].SKUCount;
   }
 }
+
+const vendorInfo = async () => {
+  const vendor = document.getElementById("vendor").textContent;
+  const respose = await fetch(`/vendorInfo?vendor=${vendor}`);
+  const data = await respose.json();
+  document.getElementById("contact").textContent = data[0].contact;
+  document.getElementById("contactEmail").textContent = data[0].contactEmail;
+  document.getElementById("salesContact").textContent = data[0].salesContact;
+  document.getElementById("salesContactEmail").textContent = data[0].salesEmail;
+  document.getElementById("apContact").textContent = data[0].paymentContact;
+  document.getElementById("apEmail").textContent = data[0].paymentEmail;
+  document.getElementById("paymentTerm").textContent = data[0].payment;
+  document.getElementById("address").textContent = data[0].address;
+};
+vendorInfo();
+
+const topProduct = async () => {
+  const vendor = document.getElementById("vendor").textContent;
+  const respose = await fetch(`/topProduct?vendor=${vendor}`);
+  const data = await respose.json();
+  const datas = document.getElementsByClassName("hotSale");
+  for (let i = 0; i < data.length * 3; i += 3) {
+    datas[i].textContent = data[Math.floor(i / 3)].product_id;
+    datas[i + 1].textContent = data[Math.floor((i + 1) / 3)].gms;
+    datas[i + 2].textContent = `${Math.round(
+      data[Math.floor((i + 2) / 3)].margin * 100
+    )}%`;
+  }
+};
+
+topProduct();

@@ -482,96 +482,179 @@ app.put("/addToCart", (req, res) => {
 app.get("/product", (req, res, next) => {
   let where = "";
 
-  let min_inventory = req.query.min_inventory;
-  if (min_inventory !== "")
-    where += `where (totalPurchaseUnits - totalSoldUnits) >= ${Number(
-      min_inventory
-    )}`;
+  let sales_from = req.query.date_from;
+  let sales_end = req.query.date_end;
 
-  let max_inventory = req.query.max_inventory;
-  if (max_inventory !== "") {
-    if (where.length > 0)
-      where += ` and (totalPurchaseUnits - totalSoldUnits) <= ${Number(
-        max_inventory
-      )}`;
-    else
-      where += `where (totalPurchaseUnits - totalSoldUnits) <= ${Number(
-        max_inventory
-      )}`;
-  }
-
-  let min_roi = req.query.min_roi;
-  if (min_roi !== "") {
-    if (where.length > 0)
-      where += ` and (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) >= ${
-        Number(min_roi) / 100
-      }`;
-    else
-      where += `where (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) >= ${
-        Number(min_roi) / 100
-      }`;
-  }
-
-  let max_roi = req.query.max_roi;
-  if (max_roi !== "") {
-    if (where.length > 0)
-      where += ` and (sellPrice - totalPurchaseAmount  / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) <= ${
-        Number(max_roi) / 100
-      }`;
-    else
-      where += `where (sellPrice - totalPurchaseAmount  / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) <= ${
-        Number(max_roi) / 100
-      }`;
-  }
-
-  let min_margin = req.query.min_margin;
-  if (min_margin !== "") {
-    if (where.length > 0)
-      where += ` and (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice >= ${
-        Number(min_margin) / 100
-      }`;
-    else
-      where += `where (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice >= ${
-        Number(min_margin) / 100
-      }`;
-  }
-
-  let max_margin = req.query.max_margin;
-  if (max_margin !== "") {
-    if (where.length > 0)
-      where += ` and (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice >= ${
-        Number(max_margin) / 100
-      }`;
-    else
-      where += `where (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice <= ${
-        Number(max_margin) / 100
-      }`;
-  }
-
-  let tag = req.query.tag;
-  if (tag !== "all") {
-    if (where.length > 0) {
-      where += ` and (tag1 = '${tag}' or tag2 = '${tag}' or tag3 = '${tag}' or tag4 = '${tag}' or tag5 = '${tag}')`;
-    } else {
-      where += `where tag1 = '${tag}' or tag2 = '${tag}' or tag3 = '${tag}' or tag4 = '${tag}' or tag5 = '${tag}'`;
+  if (sales_from || sales_end) {
+    if (sales_from !== "") {
+      where += ` where sales.sales_date >= '${sales_from}'`;
     }
-  }
 
-  let vendor = req.query.vendorName;
-  if (vendor !== "all") {
-    if (where.length > 0) where += ` and vendorName = '${vendor}'`;
-    else where += `where vendorName = '${vendor}'`;
-  }
+    if (sales_end !== "") {
+      if (where.length > 0) {
+        where += ` and sales.sales_date <= '${sales_end}'`;
+      } else {
+        where += ` where sales.sales_date <= '${sales_end}'`;
+      }
+    }
+    let min_inventory = req.query.min_inventory;
+    if (min_inventory !== "")
+      where += `and (totalPurchaseUnits - totalSoldUnits) >= ${Number(
+        min_inventory
+      )}`;
 
-  let orderBy = ` order by ${req.query.orderBy}`;
-  let queryString = where + orderBy;
-  const query = `SELECT id, image_url, modelNO, title, vendorName, vendorPrice, incoming, sellPrice, packageNo, packageCost, creationDate, (GMS / totalSoldUnits)AS avgPrice, GMS, totalSoldUnits, totalPurchaseUnits, totalPurchaseAmount,cart1, cart2, cart3, (totalPurchaseUnits - totalSoldUnits) AS inventory, remark, tag1, tag2, tag3, tag4, tag5
+    let max_inventory = req.query.max_inventory;
+    if (max_inventory !== "") {
+      if (where.length > 0)
+        where += ` and (totalPurchaseUnits - totalSoldUnits) <= ${Number(
+          max_inventory
+        )}`;
+    }
+
+    let min_roi = req.query.min_roi;
+    if (min_roi !== "") {
+      if (where.length > 0)
+        where += ` and (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) >= ${
+          Number(min_roi) / 100
+        }`;
+    }
+
+    let max_roi = req.query.max_roi;
+    if (max_roi !== "") {
+      if (where.length > 0)
+        where += ` and (sellPrice - totalPurchaseAmount  / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) <= ${
+          Number(max_roi) / 100
+        }`;
+    }
+
+    let min_margin = req.query.min_margin;
+    if (min_margin !== "") {
+      if (where.length > 0)
+        where += ` and (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice >= ${
+          Number(min_margin) / 100
+        }`;
+    }
+
+    let max_margin = req.query.max_margin;
+    if (max_margin !== "") {
+      if (where.length > 0)
+        where += ` and (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice >= ${
+          Number(max_margin) / 100
+        }`;
+    }
+
+    let tag = req.query.tag;
+    if (tag !== "all") {
+      if (where.length > 0) {
+        where += ` and (tag1 = '${tag}' or tag2 = '${tag}' or tag3 = '${tag}' or tag4 = '${tag}' or tag5 = '${tag}')`;
+      }
+    }
+
+    let vendor = req.query.vendorName;
+    if (vendor !== "all") {
+      if (where.length > 0) where += ` and vendorName = '${vendor}'`;
+    }
+
+    let orderBy = ` order by ${req.query.orderBy}`;
+    let queryString = where + orderBy;
+
+    const query = `select sales.product_id as id, productInfo.image_url, productInfo.modelNO, productInfo.title, productInfo.vendorName, productInfo.vendorPrice, productInfo.incoming, productInfo.sellPrice, productInfo.packageNo, productInfo.packageCost, productInfo.creationDate, (productInfo.GMS / productInfo.totalSoldUnits)AS avgPrice, productInfo.GMS, productInfo.totalSoldUnits, productInfo.totalPurchaseUnits, productInfo.totalPurchaseAmount,productInfo.cart1, productInfo.cart2, productInfo.cart3, (productInfo.totalPurchaseUnits - productInfo.totalSoldUnits) AS inventory, productInfo.remark, productInfo.tag1, productInfo.tag2, productInfo.tag3, productInfo.tag4, productInfo.tag5 from sales inner join productInfo on sales.product_id = productInfo.id ${queryString}`;
+    con.query(query, (err, data) => {
+      if (err) throw err;
+      res.render("product", { data });
+    });
+  } else {
+    let min_inventory = req.query.min_inventory;
+    if (min_inventory !== "")
+      where += `where (totalPurchaseUnits - totalSoldUnits) >= ${Number(
+        min_inventory
+      )}`;
+
+    let max_inventory = req.query.max_inventory;
+    if (max_inventory !== "") {
+      if (where.length > 0)
+        where += ` and (totalPurchaseUnits - totalSoldUnits) <= ${Number(
+          max_inventory
+        )}`;
+      else
+        where += `where (totalPurchaseUnits - totalSoldUnits) <= ${Number(
+          max_inventory
+        )}`;
+    }
+
+    let min_roi = req.query.min_roi;
+    if (min_roi !== "") {
+      if (where.length > 0)
+        where += ` and (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) >= ${
+          Number(min_roi) / 100
+        }`;
+      else
+        where += `where (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) >= ${
+          Number(min_roi) / 100
+        }`;
+    }
+
+    let max_roi = req.query.max_roi;
+    if (max_roi !== "") {
+      if (where.length > 0)
+        where += ` and (sellPrice - totalPurchaseAmount  / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) <= ${
+          Number(max_roi) / 100
+        }`;
+      else
+        where += `where (sellPrice - totalPurchaseAmount  / totalPurchaseUnits - packageCost) / (totalPurchaseAmount / totalPurchaseUnits + packageCost) <= ${
+          Number(max_roi) / 100
+        }`;
+    }
+
+    let min_margin = req.query.min_margin;
+    if (min_margin !== "") {
+      if (where.length > 0)
+        where += ` and (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice >= ${
+          Number(min_margin) / 100
+        }`;
+      else
+        where += `where (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice >= ${
+          Number(min_margin) / 100
+        }`;
+    }
+
+    let max_margin = req.query.max_margin;
+    if (max_margin !== "") {
+      if (where.length > 0)
+        where += ` and (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice >= ${
+          Number(max_margin) / 100
+        }`;
+      else
+        where += `where (sellPrice - totalPurchaseAmount / totalPurchaseUnits - packageCost) / sellPrice <= ${
+          Number(max_margin) / 100
+        }`;
+    }
+
+    let tag = req.query.tag;
+    if (tag !== "all") {
+      if (where.length > 0) {
+        where += ` and (tag1 = '${tag}' or tag2 = '${tag}' or tag3 = '${tag}' or tag4 = '${tag}' or tag5 = '${tag}')`;
+      } else {
+        where += `where tag1 = '${tag}' or tag2 = '${tag}' or tag3 = '${tag}' or tag4 = '${tag}' or tag5 = '${tag}'`;
+      }
+    }
+
+    let vendor = req.query.vendorName;
+    if (vendor !== "all") {
+      if (where.length > 0) where += ` and vendorName = '${vendor}'`;
+      else where += `where vendorName = '${vendor}'`;
+    }
+
+    let orderBy = ` order by ${req.query.orderBy}`;
+    let queryString = where + orderBy;
+    const query = `SELECT id, image_url, modelNO, title, vendorName, vendorPrice, incoming, sellPrice, packageNo, packageCost, creationDate, (GMS / totalSoldUnits)AS avgPrice, GMS, totalSoldUnits, totalPurchaseUnits, totalPurchaseAmount,cart1, cart2, cart3, (totalPurchaseUnits - totalSoldUnits) AS inventory, remark, tag1, tag2, tag3, tag4, tag5
     FROM productInfo
     ${queryString}`;
-  con.query(query, (err, data) => {
-    if (err) throw err;
-    res.render("product", { data });
-  });
+    con.query(query, (err, data) => {
+      if (err) throw err;
+      res.render("product", { data });
+    });
+  }
 });
 
 //update price
@@ -829,9 +912,9 @@ app.get("/invoice", (req, res) => {
   const status = req.query.status;
   let query;
   if (vendor === "all") {
-    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id, (profit - purchaseUnits*purchasePrice) as profit from invoice WHERE status = '${status}'`;
+    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice WHERE status = '${status}'`;
   } else {
-    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id, (profit - purchaseUnits*purchasePrice) as profit from invoice where status = '${status}' and vendorName = '${vendor}'`;
+    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice where status = '${status}' and vendorName = '${vendor}'`;
   }
   con.query(query, (err, result) => {
     if (err) throw err;
@@ -1112,4 +1195,28 @@ app.put("/updateTag", (req, res) => {
     if (err) throw err;
     res.status(200).send();
   });
+});
+
+app.get("/vendorInfo", (req, res) => {
+  const vendor = req.query.vendor;
+  const query = `select * from vendor where vendorName = '${vendor}'`;
+  con.query(query, (err, result) => {
+    if (err) throw err;
+    res.status(200).json(result);
+  });
+});
+
+app.get("/topProduct", (req, res) => {
+  const vendor = req.query.vendor;
+  const query = `select product_id, sum(soldPrice*soldUnits) as gms, SUM(profit)/(SUM(soldPrice*soldUnits)) AS margin from sales  where vendorName = "${vendor}" group by product_id order by sum(soldPrice*soldUnits) desc limit 10;
+  `;
+  con.query(query, (err, result) => {
+    if (err) throw err;
+    res.status(200).json(result);
+  });
+});
+
+app.get("/download", (req, res) => {
+  const fileName = req.query.file;
+  res.download(__dirname + `/public/${fileName}`);
 });

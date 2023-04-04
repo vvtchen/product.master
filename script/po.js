@@ -15,11 +15,12 @@ const filter = (ele) => {
   const eta = document.getElementsByClassName("eta");
   const status = document.getElementsByClassName("status");
   const today = new Date();
+  console.log(eta < today);
   if (ele.id === "hide") {
     for (let i = 0; i < eta.length; i++) {
       const time = new Date(eta[i].textContent);
       const s = status[i].textContent;
-      if (time >= today && s === "not recieve") {
+      if (time >= today && s === "not receive") {
         eta[i].closest("tr").style.display = "none";
       }
     }
@@ -29,7 +30,7 @@ const filter = (ele) => {
     for (let i = 0; i < eta.length; i++) {
       const time = new Date(eta[i].textContent);
       const s = status[i].textContent;
-      if (time >= today && s === "not recieve") {
+      if (time >= today && s === "not receive") {
         eta[i].closest("tr").style.display = "table-row";
       }
     }

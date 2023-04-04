@@ -62,12 +62,14 @@
 <div class="container">
     <div class="row">
       <h4>Create Products By Templates</h4>
+      
       <form action="/import-excel" method="post" enctype="multipart/form-data">
         <input
           type="file"
           name="import-excel"
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-        /><br />
+          /><br />
+          <a href="/download?file=create_template.xlsx">Download Template</a>
         <input type="submit" style="background-color: #2564cf; color: white; margin-top: 20px;" value="Upload"/>
       </form>
     </div>
@@ -80,6 +82,7 @@
           name="import-excel"
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
         /><br />
+        <a href="/download?file=sales_template.xlsx">Download Template</a>
         <input type="submit" style="background-color: #2564cf; color: white; margin-top: 20px;" value="Upload"/>
       </form>
     </div>
@@ -96,6 +99,7 @@
           name="import-excel"
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
         /><br />
+        <a href="/download?file=invoice_template.xlsx">Download Template</a>
         <input type="submit" style="background-color: #2564cf; color: white; margin-top: 20px;" value="Upload"/>
       </form>
     </div>
