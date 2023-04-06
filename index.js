@@ -54,6 +54,7 @@ mongoose
   .catch((err) => console.error("Error connecting to database:", err));
 
 const User = require("./User");
+const Admin = require("./Admin");
 
 ///mysql database
 const mysql = require("mysql2");
@@ -102,7 +103,11 @@ app.use(cookieParser());
 //log out route
 app.get("/logout", (req, res) => {
   // Clear the auth-token cookie
-  res.clearCookie("auth-token");
+  res
+    .clearCookie("auth-token")
+    .clearCookie("company")
+    .clearCookie("permission")
+    .clearCookie("user");
   res.status(200).redirect("/login");
 });
 
@@ -123,18 +128,30 @@ app.post("/register", async (req, res, next) => {
   if (exist) {
     return res.status(400).send("Email already exists");
   }
-
+  const existCompany = await User.findOne({ company: req.body.company });
+  if (existCompany) {
+    return res.status(400).send("Company name already exists");
+  }
   //hash the password
   const salt = await bcrypt.genSalt(10);
   const hashPassword = await bcrypt.hash(req.body.password, salt);
 
   const user = new User({
+    company: req.body.company,
+    name: req.body.name,
+    email: req.body.email,
+    password: hashPassword,
+  });
+
+  const admin = new Admin({
+    company: req.body.company,
     name: req.body.name,
     email: req.body.email,
     password: hashPassword,
   });
   try {
     const savedUser = await user.save();
+    const adminUser = await admin.save();
     res.redirect("/login");
   } catch (err) {
     res.status(400).send(err);
@@ -158,6 +175,7 @@ app.post("/login", async (req, res, next) => {
   if (!existUser) {
     return res.status(400).send("Email or Password is wrong");
   }
+  console.log(existUser);
 
   //compare the password with hashpassword
   const hashPassword = bcrypt.compare(req.body.password, existUser.password);
@@ -167,13 +185,54 @@ app.post("/login", async (req, res, next) => {
 
   const token = jwt.sign({ _id: existUser._id }, process.env.Token_Secret);
   const expirationTime = new Date(Date.now() + 1000 * 60 * 60 * 24);
-  res
-    .cookie("auth-token", token, {
-      httpOnly: true,
-      secure: true,
-      expires: expirationTime,
-    })
-    .redirect("index.html");
+  const existAdmin = await Admin.findOne({ email: req.body.email });
+
+  if (existAdmin) {
+    const adminToken = jwt.sign(
+      { _id: existAdmin._id },
+      process.env.Token_Secret
+    );
+    res
+      .cookie("auth-token", token, {
+        httpOnly: true,
+        secure: true,
+        expires: expirationTime,
+      })
+      .cookie("user", existUser.name, {
+        httpOnly: true,
+        secure: true,
+        expires: expirationTime,
+      })
+      .cookie("company", existUser.company, {
+        httpOnly: true,
+        secure: true,
+        expires: expirationTime,
+      })
+      .cookie("permission", adminToken, {
+        httpOnly: true,
+        secure: true,
+        expires: expirationTime,
+      })
+      .redirect("index.html");
+  } else {
+    res
+      .cookie("auth-token", token, {
+        httpOnly: true,
+        secure: true,
+        expires: expirationTime,
+      })
+      .cookie("user", existUser.name, {
+        httpOnly: true,
+        secure: true,
+        expires: expirationTime,
+      })
+      .cookie("company", existUser.company, {
+        httpOnly: true,
+        secure: true,
+        expires: expirationTime,
+      })
+      .redirect("index.html");
+  }
 });
 
 /// verify token middleware
@@ -191,6 +250,56 @@ const { url } = require("inspector");
 // static method allow as to static all files under the filename
 app.use(express.static("public"));
 app.use("/script", express.static(path.join(__dirname, "/script")));
+
+//Company
+app.get("/company", async (req, res) => {
+  const users = await User.find({ company: req.cookies["company"] });
+
+  res.render("company", {
+    users,
+  });
+});
+
+const admin = require("./adminToken");
+//add user to company
+app.post("/registerUser", admin, async (req, res, next) => {
+  //check if the data is validate
+  const company = req.cookies["company"];
+  const data = {
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    company: company,
+  };
+
+  const { error } = registerValidation(data);
+  if (error) {
+    return res.status(400).json({ err: error.details[0].message });
+  }
+
+  //check if the data is already used?
+  const exist = await User.findOne({ email: data.email });
+  if (exist) {
+    return res.status(400).json({ err: `Email already existed` });
+  }
+  //hash the password
+  const salt = await bcrypt.genSalt(10);
+  const hashPassword = await bcrypt.hash(data.password, salt);
+
+  const user = new User({
+    company: company,
+    name: data.name,
+    email: data.email,
+    password: hashPassword,
+  });
+  try {
+    const savedUser = await user.save();
+    res.status(200).json({ user: user.name, email: user.email });
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
 //import products info by templates
 app.post(
   "/import-excel",
@@ -213,8 +322,12 @@ app.post(
             errorMessage: "Can't find vendor with this name",
           });
         }
+        const company = req.cookies["company"];
+        for (let row of rows) {
+          row.push(company);
+        }
         let query =
-          "INSERT INTO productInfo (vendorName, title, modelNO, vendorPrice, sellPrice, packageNo, packageCost, image_url) VALUES ?";
+          "INSERT INTO productInfo (vendorName, title, modelNO, vendorPrice, sellPrice, packageNo, packageCost, image_url, company) VALUES ?";
         con.query(query, [rows], function (err, result) {
           if (err) {
             throw err;
@@ -273,6 +386,7 @@ app.post(
             errorMessage: "Can't find any data",
           });
         }
+        const company = req.cookies["company"];
         for (let row of rows) {
           let id = row[1];
           let quantity = row[4];
@@ -308,12 +422,13 @@ app.post(
             }
           }
           row.push(vendor[0].vendorName);
+          row.push(company);
         }
         con.connect((error) => {
           if (error) {
             console.error(error);
           } else {
-            let query = `INSERT INTO sales (sales_id, product_id, title, soldPrice, soldUnits, sales_date, profit, vendorName) VALUES ?`;
+            let query = `INSERT INTO sales (sales_id, product_id, title, soldPrice, soldUnits, sales_date, profit, vendorName, company) VALUES ?`;
             con.query(query, [rows], function (err, result) {
               if (err) throw err;
             });
@@ -413,8 +528,12 @@ app.post(
                 errorMessage: "Cannot find PO Number",
               });
             } else {
+              const company = req.cookies["company"];
+              for (let row of rows) {
+                row.push(company);
+              }
               let query =
-                "INSERT INTO invoice (vendorName, invoice_id, po_id, product_id, purchaseUnits, purchasePrice, invoice_date) VALUES ?";
+                "INSERT INTO invoice (vendorName, invoice_id, po_id, product_id, purchaseUnits, purchasePrice, invoice_date, company) VALUES ?";
               con.query(query, [rows], function (err, result) {
                 if (err) throw err;
               });
@@ -486,7 +605,8 @@ app.put("/addToCart", (req, res) => {
   const id = data.product_id;
   const quantity = data.quantity;
   const cart = data.cart;
-  const query = `UPDATE productInfo SET ${cart} = ${quantity} WHERE id = ${id}`;
+  const company = req.cookies["company"];
+  const query = `UPDATE productInfo SET ${cart} = ${quantity} WHERE id = ${id} and company = '${company}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     res.json({ product_id: id, quantity: quantity });
@@ -568,6 +688,12 @@ app.get("/product", (req, res, next) => {
     let vendor = req.query.vendorName;
     if (vendor !== "all") {
       if (where.length > 0) where += ` and vendorName = '${vendor}'`;
+    }
+
+    if (where.length > 0) {
+      where += ` and company = '${req.cookies["company"]}'`;
+    } else {
+      where += ` where company = '${req.cookies["company"]}'`;
     }
 
     let orderBy = ` order by ${req.query.orderBy}`;
@@ -659,6 +785,11 @@ app.get("/product", (req, res, next) => {
       if (where.length > 0) where += ` and vendorName = '${vendor}'`;
       else where += `where vendorName = '${vendor}'`;
     }
+    if (where.length > 0) {
+      where += ` and company = '${req.cookies["company"]}'`;
+    } else {
+      where += ` where company = '${req.cookies["company"]}'`;
+    }
 
     let orderBy = ` order by ${req.query.orderBy}`;
     let queryString = where + orderBy;
@@ -677,7 +808,8 @@ app.put("/priceUpdate", (req, res) => {
   const data = req.body;
   const product_id = data.product_id;
   const price = data.sellPrice;
-  const query = `UPDATE productInfo SET sellPrice = ${price} WHERE id = ${product_id}`;
+  const company = req.cookies["company"];
+  const query = `UPDATE productInfo SET sellPrice = ${price} WHERE id = ${product_id} and company = '${company}'`;
 
   con.query(query, (err, data) => {
     if (err) throw err;
@@ -689,8 +821,9 @@ app.put("/priceUpdate", (req, res) => {
 app.get("/search", (req, res) => {
   const product = req.query.product;
   const searchBy = req.query.searchBy;
+  const company = req.cookies["company"];
   const query = `SELECT id, image_url, modelNO, title, vendorName, vendorPrice, incoming, sellPrice, packageNo, packageCost, creationDate, (GMS / totalSoldUnits)AS avgPrice, GMS, totalSoldUnits, totalPurchaseUnits, totalPurchaseAmount,cart1, cart2, cart3, (totalPurchaseUnits - totalSoldUnits) AS inventory, remark,
-  tag1, tag2, tag3, tag4, tag5 from productInfo where ${searchBy} like '%${product}%'`;
+  tag1, tag2, tag3, tag4, tag5 from productInfo where ${searchBy} like '%${product}%' and company = '${company}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     res.render("product", { data });
@@ -725,8 +858,8 @@ app.get("/productChart", (req, res, next) => {
 
 ///cart
 app.get("/cart", (req, res) => {
-  const query =
-    "SELECT SUM(cart1)AS cart1, SUM(cart2)AS cart2, SUM(cart3)AS cart3, SUM(cart1*vendorPrice) AS cart1Amount, SUM(cart2*vendorPrice) AS cart2Amount, SUM(cart3*vendorPrice) AS cart3Amount, vendorName FROM productInfo where cart1 > 0 or cart2 > 0 or cart3 > 0 GROUP BY vendorName ";
+  const company = req.cookies["company"];
+  const query = `SELECT SUM(cart1)AS cart1, SUM(cart2)AS cart2, SUM(cart3)AS cart3, SUM(cart1*vendorPrice) AS cart1Amount, SUM(cart2*vendorPrice) AS cart2Amount, SUM(cart3*vendorPrice) AS cart3Amount, vendorName FROM productInfo where (cart1 > 0 or cart2 > 0 or cart3 > 0) and company = '${company}' GROUP BY vendorName `;
   con.query(query, (err, result) => {
     if (err) throw err;
     console.log(result);
@@ -738,7 +871,8 @@ app.get("/cart", (req, res) => {
 app.get("/shoppingCart1", (req, res) => {
   const vendor = req.query.vendor;
   const cart = req.query.cart;
-  const where = `WHERE ${cart} > 0 AND vendorName = '${vendor}'`;
+  const company = req.cookies["company"];
+  const where = `WHERE ${cart} > 0 AND vendorName = '${vendor}' and company = '${company}'`;
   const query = `SELECT id, image_url, modelNO, title, vendorName, vendorPrice, incoming, sellPrice, packageNo, packageCost, creationDate, (GMS / totalSoldUnits)AS avgPrice, GMS, totalSoldUnits, totalPurchaseUnits, totalPurchaseAmount,cart1, cart2, cart3, (totalPurchaseUnits - totalSoldUnits) AS inventory, remark, tag1, tag2, tag3, tag4, tag5
     FROM productInfo ${where}`;
 
@@ -752,7 +886,8 @@ app.get("/shoppingCart1", (req, res) => {
 app.get("/shoppingCart2", (req, res) => {
   const vendor = req.query.vendor;
   const cart = req.query.cart;
-  const where = `WHERE ${cart} > 0 AND vendorName = '${vendor}'`;
+  const company = req.cookies["company"];
+  const where = `WHERE ${cart} > 0 AND vendorName = '${vendor}' and company = '${company}'`;
   const query = `SELECT id, image_url, modelNO, title, vendorName, vendorPrice, incoming, sellPrice, packageNo, packageCost, creationDate, (GMS / totalSoldUnits)AS avgPrice, GMS, totalSoldUnits, totalPurchaseUnits, totalPurchaseAmount,cart1, cart2, cart3, (totalPurchaseUnits - totalSoldUnits) AS inventory, remark, tag1, tag2, tag3, tag4, tag5
     FROM productInfo ${where}`;
   con.query(query, (err, data) => {
@@ -765,7 +900,8 @@ app.get("/shoppingCart2", (req, res) => {
 app.get("/shoppingCart3", (req, res) => {
   const vendor = req.query.vendor;
   const cart = req.query.cart;
-  const where = `WHERE ${cart} > 0 AND vendorName = '${vendor}'`;
+  const company = req.cookies["company"];
+  const where = `WHERE ${cart} > 0 AND vendorName = '${vendor}' and company = '${company}'`;
   const query = `SELECT id, image_url, modelNO, title, vendorName, vendorPrice, incoming, sellPrice, packageNo, packageCost, creationDate, (GMS / totalSoldUnits)AS avgPrice, GMS, totalSoldUnits, totalPurchaseUnits, totalPurchaseAmount,cart1, cart2, cart3, (totalPurchaseUnits - totalSoldUnits) AS inventory, remark, tag1, tag2, tag3, tag4, tag5
     FROM productInfo ${where}`;
   con.query(query, (err, data) => {
@@ -780,7 +916,8 @@ app.post("/makePO1", async (req, res, next) => {
   const cart = req.body.cart;
   const poNO = req.body.poNumber;
   const ETA = req.body.ETA;
-  const query1 = `SELECT id, ${cart}, vendorPrice, modelNO, vendorName FROM productInfo WHERE ${cart} > 0 AND vendorName = '${vendor}'`;
+  const company = req.cookies["company"];
+  const query1 = `SELECT id, ${cart}, vendorPrice, modelNO, vendorName FROM productInfo WHERE ${cart} > 0 AND vendorName = '${vendor}' and company = '${company}'`;
   const data = await Query(query1);
   for (product of data) {
     const id = product.id;
@@ -789,15 +926,15 @@ app.post("/makePO1", async (req, res, next) => {
     const modelNo = product.modelNO;
     const vendor = product.vendorName;
     const query2 = `INSERT INTO PO 
-        (id, product_id, modelNO, vendorPrice, quantity, vendorName, ETA)
+        (id, product_id, modelNO, vendorPrice, quantity, vendorName, ETA, company)
         VALUES
-        ('${poNO}', ${id}, '${modelNo}', ${vendorPrice}, ${quantity}, '${vendor}', '${ETA}')`;
+        ('${poNO}', ${id}, '${modelNo}', ${vendorPrice}, ${quantity}, '${vendor}', '${ETA}', '${company}')`;
     const data2 = await Query2(query2);
   }
   for (product of data) {
     const id = product.id;
     const quantity = product.cart1;
-    const query3 = `UPDATE productInfo SET cart1 = 0, incoming = incoming + ${quantity} WHERE id = ${id}`;
+    const query3 = `UPDATE productInfo SET cart1 = 0, incoming = incoming + ${quantity} WHERE id = ${id} and company = '${company}'`;
     const data3 = await Query2(query3);
   }
   const url = `/poDetail?id=${poNO}`;
@@ -811,7 +948,8 @@ app.post("/makePO2", async (req, res, next) => {
   const cart = req.body.cart;
   const poNO = req.body.poNumber;
   const ETA = req.body.ETA;
-  const query1 = `SELECT id, ${cart}, vendorPrice, modelNO, vendorName FROM productInfo WHERE ${cart} > 0 AND vendorName = '${vendor}'`;
+  const company = req.cookies["company"];
+  const query1 = `SELECT id, ${cart}, vendorPrice, modelNO, vendorName FROM productInfo WHERE ${cart} > 0 AND vendorName = '${vendor}' and company = '${company}'`;
   const data = await Query(query1);
   for (product of data) {
     const id = product.id;
@@ -820,15 +958,15 @@ app.post("/makePO2", async (req, res, next) => {
     const modelNo = product.modelNO;
     const vendor = product.vendorName;
     const query2 = `INSERT INTO PO 
-        (id, product_id, modelNO, vendorPrice, quantity, vendorName, ETA)
+        (id, product_id, modelNO, vendorPrice, quantity, vendorName, ETA, company)
         VALUES
-        ('${poNO}', ${id}, '${modelNo}', ${vendorPrice}, ${quantity}, '${vendor}', '${ETA}')`;
+        ('${poNO}', ${id}, '${modelNo}', ${vendorPrice}, ${quantity}, '${vendor}', '${ETA}', '${company}')`;
     const data2 = await Query2(query2);
   }
   for (product of data) {
     const id = product.id;
     const quantity = product.cart2;
-    const query3 = `UPDATE productInfo SET cart2 = 0, incoming = incoming + ${quantity} WHERE id = ${id}`;
+    const query3 = `UPDATE productInfo SET cart2 = 0, incoming = incoming + ${quantity} WHERE id = ${id} and company = '${company}'`;
     const data3 = await Query2(query3);
   }
   const url = `/poDetail?id=${poNO}`;
@@ -842,7 +980,8 @@ app.post("/makePO3", async (req, res, next) => {
   const cart = req.body.cart;
   const poNO = req.body.poNumber;
   const ETA = req.body.ETA;
-  const query1 = `SELECT id, ${cart}, vendorPrice, modelNO, vendorName FROM productInfo WHERE ${cart} > 0 AND vendorName = '${vendor}'`;
+  const company = req.cookies["company"];
+  const query1 = `SELECT id, ${cart}, vendorPrice, modelNO, vendorName FROM productInfo WHERE ${cart} > 0 AND vendorName = '${vendor}' and company = '${company}'`;
   const data = await Query(query1);
   for (product of data) {
     const id = product.id;
@@ -851,15 +990,15 @@ app.post("/makePO3", async (req, res, next) => {
     const modelNo = product.modelNO;
     const vendor = product.vendorName;
     const query2 = `INSERT INTO PO 
-        (id, product_id, modelNO, vendorPrice, quantity, vendorName, ETA)
+        (id, product_id, modelNO, vendorPrice, quantity, vendorName, ETA, company)
         VALUES
-        ('${poNO}', ${id}, '${modelNo}', ${vendorPrice}, ${quantity}, '${vendor}', '${ETA}')`;
+        ('${poNO}', ${id}, '${modelNo}', ${vendorPrice}, ${quantity}, '${vendor}', '${ETA}', '${company}')`;
     const data2 = await Query2(query2);
   }
   for (product of data) {
     const id = product.id;
     const quantity = product.cart3;
-    const query3 = `UPDATE productInfo SET cart3 = 0, incoming = incoming + ${quantity} WHERE id = ${id}`;
+    const query3 = `UPDATE productInfo SET cart3 = 0, incoming = incoming + ${quantity} WHERE id = ${id} and company = '${company}'`;
     const data3 = await Query2(query3);
   }
   const url = `/poDetail?id=${poNO}`;
@@ -885,11 +1024,12 @@ async function Query2(query) {
 app.get("/purchaseOrder", (req, res) => {
   const vendor = req.query.vendorName;
   const status = req.query.status;
+  const company = req.cookies["company"];
   let query;
   if (vendor === "all") {
-    query = `select distinct(id), status, date_format(ETA, "%Y/%m/%d") as ETA, vendorName, invoiceID from PO WHERE status = '${status}'`;
+    query = `select distinct(id), status, date_format(ETA, "%Y/%m/%d") as ETA, vendorName, invoiceID from PO WHERE status = '${status}' and company = '${company}'`;
   } else {
-    query = `select distinct(id), status, date_format(ETA, "%Y/%m/%d") as ETA, vendorName, invoiceID from PO where status = '${status}' and vendorName = '${vendor}'`;
+    query = `select distinct(id), status, date_format(ETA, "%Y/%m/%d") as ETA, vendorName, invoiceID from PO where status = '${status}' and vendorName = '${vendor}' and company = '${company}'`;
   }
   con.query(query, (err, result) => {
     if (err) throw err;
@@ -901,7 +1041,8 @@ app.get("/purchaseOrder", (req, res) => {
 
 app.get("/poDetail", (req, res) => {
   const id = req.query.id;
-  const query = `select *, date_format(ETA, "%Y/%m/%d") as ETA from PO where id = '${id}'`;
+  const company = req.cookies["company"];
+  const query = `select *, date_format(ETA, "%Y/%m/%d") as ETA from PO where id = '${id}' and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     else {
@@ -913,7 +1054,8 @@ app.get("/poDetail", (req, res) => {
 // for searching po by po number
 app.get("/poID", (req, res) => {
   const poNumber = req.query.id;
-  const query = `select id from PO where id = '${poNumber}' limit 1`;
+  const company = req.cookies["company"];
+  const query = `select id from PO where id = '${poNumber}' and company = '${company}' limit 1`;
   con.query(query, (err, result) => {
     if (err) throw err;
     else {
@@ -925,11 +1067,12 @@ app.get("/poID", (req, res) => {
 app.get("/invoice", (req, res) => {
   const vendor = req.query.vendorName;
   const status = req.query.status;
+  const company = req.cookies["company"];
   let query;
   if (vendor === "all") {
-    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice WHERE status = '${status}'`;
+    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice WHERE status = '${status}' and company = '${company}'`;
   } else {
-    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice where status = '${status}' and vendorName = '${vendor}'`;
+    query = `select distinct(invoice_id), status, vendorName, date_format(invoice_date, "%Y/%m/%d") as date, po_id from invoice where status = '${status}' and vendorName = '${vendor}' and company = '${company}'`;
   }
   con.query(query, (err, result) => {
     if (err) throw err;
@@ -941,7 +1084,8 @@ app.get("/invoice", (req, res) => {
 
 app.get("/invoiceDetail", (req, res) => {
   const id = req.query.id;
-  const query = `select invoice.invoice_id, invoice.vendorName,invoice.po_id, invoice.product_id, invoice.purchaseUnits, invoice.purchasePrice,(invoice.purchaseUnits - invoice.soldUnits)as salesStatus, invoice.status, date_format(invoice_date, "%Y/%m/%d") as date, (invoice.profit - invoice.purchaseUnits*invoice.purchasePrice) as profit, PO.modelNO, PO.vendorPrice as po_price, PO.quantity as po_quantity from invoice inner join PO where invoice.invoice_id = '${id}' and invoice.po_id = PO.id and invoice.product_id = PO.product_id;`;
+  const company = req.cookies["company"];
+  const query = `select invoice.invoice_id, invoice.vendorName,invoice.po_id, invoice.product_id, invoice.purchaseUnits, invoice.purchasePrice,(invoice.purchaseUnits - invoice.soldUnits)as salesStatus, invoice.status, date_format(invoice_date, "%Y/%m/%d") as date, (invoice.profit - invoice.purchaseUnits*invoice.purchasePrice) as profit, PO.modelNO, PO.vendorPrice as po_price, PO.quantity as po_quantity from invoice inner join PO where invoice.invoice_id = '${id}' and invoice.company = '${company}' and invoice.po_id = PO.id and invoice.product_id = PO.product_id;`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.render("invoiceDetail", { result });
@@ -951,20 +1095,23 @@ app.get("/invoiceDetail", (req, res) => {
 //for searching by invoice number
 app.get("/invoiceID", (req, res) => {
   const id = req.query.id;
-  const query = `select invoice_id from invoice where invoice_id = '${id}' limit 1`;
+  const company = req.cookies["company"];
+  const query = `select invoice_id from invoice where invoice_id = '${id}' and company = '${company}' limit 1`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
   });
 });
 
+/// need to check
 app.get("/vendorDashboard", (req, res) => {
   res.render("vendorDashboard", { vendor: req.query.vendor });
 });
 
 // create tag and view all tags page
 app.get("/tag", (req, res) => {
-  const query = `select * from tag`;
+  const company = req.cookies["company"];
+  const query = `select * from tag where company = '${company}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     res.render("tag", { data });
@@ -974,7 +1121,8 @@ app.get("/tag", (req, res) => {
 //check weather the tag is already exists
 app.get("/createTag", (req, res) => {
   const tag = req.query.tag;
-  const query = `select tagName from tag where tagName = '${tag}'`;
+  const company = req.cookies["company"];
+  const query = `select tagName from tag where tagName = '${tag}' and company = '${company}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     res.status(200).json(data);
@@ -984,7 +1132,8 @@ app.get("/createTag", (req, res) => {
 app.post("/createTag", (req, res) => {
   const tag = req.body.tag;
   const description = req.body.description;
-  const query = `INSERT INTO tag (tagName, description) VALUES ('${tag}', '${description}')`;
+  const company = req.cookies["company"];
+  const query = `INSERT INTO tag (tagName, description, company) VALUES ('${tag}', '${description}', '${company}')`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).send();
@@ -992,7 +1141,7 @@ app.post("/createTag", (req, res) => {
 });
 
 app.get("/vendorPage", (req, res) => {
-  const query = `select * from vendor`;
+  const query = `select * from vendor where company = '${req.cookies["company"]}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     res.render("vendor", { data });
@@ -1009,13 +1158,14 @@ app.post("/createVendorInfo", async (req, res) => {
   const salesEmail = req.body.salesEmail;
   const address = req.body.address;
   const payment = req.body.payment;
+  const company = req.cookies["company"];
 
   const checkExist = await Query(
-    `select vendorName from vendor where vendorName = '${vendor}'`
+    `select vendorName from vendor where vendorName = '${vendor}' and company = '${company}'`
   );
   console.log(checkExist);
   if (checkExist.length === 0) {
-    const query = `INSERT INTO vendor (vendorName, contact, contactEmail, paymentContact, paymentEmail, salesContact, salesEmail, address, payment) VALUES ('${vendor}', '${contact}', '${contactEmail}', '${paymentContact}', '${paymentEmail}', '${salesContact}', '${salesEmail}', '${address}', '${payment}')`;
+    const query = `INSERT INTO vendor (vendorName, contact, contactEmail, paymentContact, paymentEmail, salesContact, salesEmail, address, payment, company) VALUES ('${vendor}', '${contact}', '${contactEmail}', '${paymentContact}', '${paymentEmail}', '${salesContact}', '${salesEmail}', '${address}', '${payment}', '${company}')`;
     con.query(query, (err, result) => {
       if (err) throw err;
       res.status(200).json(result);
@@ -1028,7 +1178,7 @@ app.post("/createVendorInfo", async (req, res) => {
 
 //get all vendor when we try to filter all products
 app.get("/vendor", (req, res) => {
-  let query = `SELECT vendorName FROM vendor `;
+  let query = `SELECT vendorName FROM vendor where company = '${req.cookies["company"]}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     else {
@@ -1040,7 +1190,8 @@ app.get("/vendor", (req, res) => {
 //get incoming info
 app.get("/getIncoming", (req, res) => {
   const id = req.query.id;
-  const query = `SELECT id, modelNO, quantity, status, date_format(ETA, "%Y/%m/%d") as ETA, vendorName FROM PO WHERE product_id = ${id} AND status = 'not receive'`;
+  const company = req.cookies["company"];
+  const query = `SELECT id, modelNO, quantity, status, date_format(ETA, "%Y/%m/%d") as ETA, vendorName FROM PO WHERE product_id = ${id} AND status = 'not receive' and company = '${company}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     res.json(data);
@@ -1051,7 +1202,8 @@ app.get("/getIncoming", (req, res) => {
 app.post("/remark", (req, res) => {
   const id = Number(req.body.id);
   const msg = req.body.msg;
-  const query = `UPDATE productInfo SET remark = "${msg}" WHERE id = ${id}`;
+  const company = req.cookies["company"];
+  const query = `UPDATE productInfo SET remark = "${msg}" WHERE id = ${id} and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).send();
@@ -1064,9 +1216,10 @@ app.put("/modifyProduct", (req, res) => {
   const packageNo = req.body.packageNo;
   const packageCost = req.body.packageCost;
   const id = req.body.product_id;
+  const company = req.cookies["company"];
   const query = `update productInfo set vendorPrice = ${vendorPrice}, packageNo = '${packageNo}', packageCost = ${Number(
     packageCost
-  )} where id = ${id}`;
+  )} where id = ${id} and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).send();
@@ -1076,7 +1229,8 @@ app.put("/modifyProduct", (req, res) => {
 //verify invoice
 app.post("/verifyInvoice", (req, res) => {
   const inv = req.body.invoice_id;
-  const query = `update invoice set status = 'finished' where invoice_id = '${inv}'`;
+  const company = req.cookies["company"];
+  const query = `update invoice set status = 'finished' where invoice_id = '${inv}' and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).send();
@@ -1086,7 +1240,8 @@ app.post("/verifyInvoice", (req, res) => {
 //get sales data (query year)
 app.get("/salesData", (req, res) => {
   const year = req.query.year;
-  const query = `select sum(soldUnits)as totalSoldUnits, sum(soldUnits*soldPrice) as GMS, count(distinct product_id) as SKUCount from sales where year(sales_date) = '${year}'`;
+  const company = req.cookies["company"];
+  const query = `select sum(soldUnits)as totalSoldUnits, sum(soldUnits*soldPrice) as GMS, count(distinct product_id) as SKUCount from sales where year(sales_date) = '${year}' and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1096,7 +1251,8 @@ app.get("/salesData", (req, res) => {
 //get invoice data (query year)
 app.get("/invoiceData", (req, res) => {
   const year = req.query.year;
-  const query = `select sum(purchaseUnits) as totalPurchaseUnits, sum(purchaseUnits*purchasePrice) as totalPurchase, count(distinct product_id) as SKUCount from invoice where year(invoice_date) = '${year}'`;
+  const company = req.cookies["company"];
+  const query = `select sum(purchaseUnits) as totalPurchaseUnits, sum(purchaseUnits*purchasePrice) as totalPurchase, count(distinct product_id) as SKUCount from invoice where year(invoice_date) = '${year}' and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1105,8 +1261,9 @@ app.get("/invoiceData", (req, res) => {
 
 // get current inventory
 app.get("/inventory", (req, res) => {
+  const company = req.cookies["company"];
   const query = `select count(distinct product_id) as SKU, sum(purchaseUnits - soldUnits)as inventory, sum((purchaseUnits - soldUnits) * purchasePrice)
-    as inventoryAmount from invoice where purchaseUnits - soldUnits > 0;`;
+    as inventoryAmount from invoice where purchaseUnits - soldUnits > 0 and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1117,7 +1274,8 @@ app.get("/inventory", (req, res) => {
 
 app.get("/dbChartSales", (req, res) => {
   const year = req.query.year;
-  const query = `select count(distinct product_id) as skuSold, sum(profit) as profit, sum(soldUnits*soldPrice) as GMS, sum(soldUnits) as totalUnits, month(sales_date) as month from sales where year(sales_date) = '${year}' group by month`;
+  const company = req.cookies["company"];
+  const query = `select count(distinct product_id) as skuSold, sum(profit) as profit, sum(soldUnits*soldPrice) as GMS, sum(soldUnits) as totalUnits, month(sales_date) as month from sales where year(sales_date) = '${year}' and company = '${company}' group by month`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1126,7 +1284,8 @@ app.get("/dbChartSales", (req, res) => {
 
 app.get("/dbChartInvoice", (req, res) => {
   const year = req.query.year;
-  const query = `select count(distinct product_id) as sku, sum(purchaseUnits) as totalPurchaseQuantity, sum(purchaseUnits*purchasePrice) as totalPurchase, month(invoice_date) as month from invoice where year(invoice_date) = '${year}' group by month;`;
+  const company = req.cookies["company"];
+  const query = `select count(distinct product_id) as sku, sum(purchaseUnits) as totalPurchaseQuantity, sum(purchaseUnits*purchasePrice) as totalPurchase, month(invoice_date) as month from invoice where year(invoice_date) = '${year}' and company = '${company}' group by month;`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1137,7 +1296,8 @@ app.get("/dbChartInvoice", (req, res) => {
 app.get("/salesDataVendor", (req, res) => {
   const year = req.query.year;
   const vendor = req.query.vendor;
-  const query = `select sum(soldUnits)as totalSoldUnits, sum(soldUnits*soldPrice) as GMS, count(distinct product_id) as SKUCount from sales where year(sales_date) = '${year}' and vendorName = '${vendor}'`;
+  const company = req.cookies["company"];
+  const query = `select sum(soldUnits)as totalSoldUnits, sum(soldUnits*soldPrice) as GMS, count(distinct product_id) as SKUCount from sales where year(sales_date) = '${year}' and vendorName = '${vendor}' and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1149,7 +1309,8 @@ app.get("/salesDataVendor", (req, res) => {
 app.get("/invoiceDataVendor", (req, res) => {
   const year = req.query.year;
   const vendor = req.query.vendor;
-  const query = `select sum(purchaseUnits) as totalPurchaseUnits, sum(purchaseUnits*purchasePrice) as totalPurchase, count(distinct product_id) as SKUCount from invoice where year(invoice_date) = '${year}' and vendorName = '${vendor}'`;
+  const company = req.cookies["company"];
+  const query = `select sum(purchaseUnits) as totalPurchaseUnits, sum(purchaseUnits*purchasePrice) as totalPurchase, count(distinct product_id) as SKUCount from invoice where year(invoice_date) = '${year}' and vendorName = '${vendor}' and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1160,8 +1321,9 @@ app.get("/invoiceDataVendor", (req, res) => {
 
 app.get("/inventoryVendor", (req, res) => {
   const vendor = req.query.vendor;
+  const company = req.cookies["company"];
   const query = `select count(distinct product_id) as SKU, sum(purchaseUnits - soldUnits)as inventory, sum((purchaseUnits - soldUnits) * purchasePrice)
-    as inventoryAmount from invoice where purchaseUnits - soldUnits > 0 and vendorName = '${vendor}'`;
+    as inventoryAmount from invoice where purchaseUnits - soldUnits > 0 and vendorName = '${vendor}' and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1173,7 +1335,8 @@ app.get("/inventoryVendor", (req, res) => {
 app.get("/dbChartSalesVendor", (req, res) => {
   const year = req.query.year;
   const vendor = req.query.vendor;
-  const query = `select count(distinct product_id) as skuSold, sum(profit) as profit, sum(soldUnits*soldPrice) as GMS, sum(soldUnits) as totalUnits, month(sales_date) as month from sales where year(sales_date) = '${year}' and vendorName = '${vendor}' group by month`;
+  const company = req.cookies["company"];
+  const query = `select count(distinct product_id) as skuSold, sum(profit) as profit, sum(soldUnits*soldPrice) as GMS, sum(soldUnits) as totalUnits, month(sales_date) as month from sales where year(sales_date) = '${year}' and vendorName = '${vendor}' and company = '${company}' group by month`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1183,7 +1346,8 @@ app.get("/dbChartSalesVendor", (req, res) => {
 app.get("/dbChartInvoiceVendor", (req, res) => {
   const year = req.query.year;
   const vendor = req.query.vendor;
-  const query = `select count(distinct product_id) as sku, sum(purchaseUnits) as totalPurchaseQuantity, sum(purchaseUnits*purchasePrice) as totalPurchase, month(invoice_date) as month from invoice where year(invoice_date) = '${year}' and vendorName = '${vendor}' group by month;`;
+  const company = req.cookies["company"];
+  const query = `select count(distinct product_id) as sku, sum(purchaseUnits) as totalPurchaseQuantity, sum(purchaseUnits*purchasePrice) as totalPurchase, month(invoice_date) as month from invoice where year(invoice_date) = '${year}' and vendorName = '${vendor}' and company = '${company}' group by month;`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1192,7 +1356,7 @@ app.get("/dbChartInvoiceVendor", (req, res) => {
 
 //taglist
 app.get("/taglist", (req, res) => {
-  const query = `select tagName from tag`;
+  const query = `select tagName from tag where company = '${req.cookies["company"]}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1205,7 +1369,8 @@ app.put("/updateTag", (req, res) => {
   const tag = req.body.tagName;
   const id = req.body.product_id;
   const index = req.body.index;
-  const query = `update productInfo set tag${index} = '${tag}' where id = ${id}`;
+  const company = req.cookies["company"];
+  const query = `update productInfo set tag${index} = '${tag}' where id = ${id} and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).send();
@@ -1214,7 +1379,8 @@ app.put("/updateTag", (req, res) => {
 
 app.get("/vendorInfo", (req, res) => {
   const vendor = req.query.vendor;
-  const query = `select * from vendor where vendorName = '${vendor}'`;
+  const company = req.cookies["company"];
+  const query = `select * from vendor where vendorName = '${vendor}' and company = '${company}'`;
   con.query(query, (err, result) => {
     if (err) throw err;
     res.status(200).json(result);
@@ -1223,7 +1389,8 @@ app.get("/vendorInfo", (req, res) => {
 
 app.get("/topProduct", (req, res) => {
   const vendor = req.query.vendor;
-  const query = `select product_id, sum(soldPrice*soldUnits) as gms, SUM(profit)/(SUM(soldPrice*soldUnits)) AS margin from sales  where vendorName = "${vendor}" group by product_id order by sum(soldPrice*soldUnits) desc limit 10;
+  const company = req.cookies["company"];
+  const query = `select product_id, sum(soldPrice*soldUnits) as gms, SUM(profit)/(SUM(soldPrice*soldUnits)) AS margin from sales  where vendorName = "${vendor}" and company = '${company}' group by product_id order by sum(soldPrice*soldUnits) desc limit 10
   `;
   con.query(query, (err, result) => {
     if (err) throw err;
