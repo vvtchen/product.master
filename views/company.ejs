@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="table.css">
+    <link rel="stylesheet" href="account.css">
   </head>
   <body>
     
@@ -24,31 +25,31 @@
 <header class="header">
     <nav>
         <ul>
-            <li style="width: 5%; margin-top: px;" >
+            <li style="width: 2%" >
                 <span style="cursor: pointer; font-size: 26px;" onclick="openNav()"> &#9776</span>
               </li>
-          <li style=" margin:0px auto; width: 85%;">
+          <li style=" margin:0 auto; width: 85%;">
             
-            <form action="/search" style="margin: 0 auto;">
+            <form action="/search" style="margin: 0 auto;" class="search">
               <input
                 type="search"
                 class="searchBar"
                 name="product"
                 width="100%"
+                placeholder="Search... "
               />
-              <select name="searchBy" class="searchBar">
-                <option value="title" class="searchBar">Product Title</option>
-                <option value="id" class="searchBar">Product ID</option>
-              </select>
 
             </form>
           </li>
-          <li style="width: 3%; float: right; margin-right: 15px;">
+          <li style="width: 2%; float: right; margin-right: 15px;">
             <a href="logout"><i class="fa fa-sign-out" style="font-size: 25px;"></i></a>
           </li>
-          <li style="width: 3%; float: right; margin-right: 15px;" >
-          <a href="cart"><i class="fa fa-shopping-cart" style="font-size: 25px;"></i></a>
+          <li style="width: 2%; float: right; margin-right: 15px;" >
+          <a href="company"><i class="fa fa-user" style="font-size: 25px;"></i></a>
         </li>
+          <li style="width: 2%; float: right; margin-right: 15px;" >
+            <a href="cart"><i class="fa fa-shopping-cart" style="font-size: 25px;"></i></a>
+          </li>
           
         </ul>
       </nav>
@@ -74,30 +75,46 @@
     <script src="/script/navBar.js"></script>
 </html>
 
-<h1><%= users[0].company%></h1>
-<div class="table-wrapper">
+<div class="container">
+  <i class="fa fa-user-circle-o fa-5x" ></i>
+
+  
+      <p>User</p><br>
+      <p id="user"><%= user.name %></p><br>
+      <p>Account</p><br>
+      <p id="emailAccount"><%= user.email %></p><br>
+      <p>Company</p><br>
+      <p id="company"><%= user.company %></p><br>
+ 
+
+  <a href="">Change Password</a>
+</div>
+
+
+<h1  style="margin-left: 40%"><%= users[0].company%></h1>
+<div class="table-wrapper" style="margin-left: 40%; margin-top: 50px; position: fixed; max-width: 40%; width: 40%; overflow: scroll; max-height: 90%;">
     <table class="fl-table" id="table">
         <tr>
             <th>User Name</th>
             <th>Email</th>
+            <th>Permission Level</th>
           </tr>
         <% for( user of users ) { %>
             <tr>
                 <td><%= user.name %></td>
                 <td><%= user.email %></td>
+                <td><%= user.permission %></td>
               </tr>
         <% } %>
           
         
     </table>
     <div id="input" style="display: none;">
-        <input type="text" name="name" id="name" placeholder="User Name">
         <input type="email" name="email" id="email" placeholder="Email">
-        <input type="password" name="password" id="password" placeholder="Password">
         <input type="button" onclick="add()" value="Add">
         <small id="msg" style="color: red;"></small>
     </div>
-    <button onclick="expand()" id="btn">Add User</button>
+    <button onclick="expand()" id="btn">Invite User</button>
     
     
 </div>

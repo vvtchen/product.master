@@ -27,6 +27,18 @@ const userSchema = new mongoose.Schema({
     require: true,
     min: 6,
   },
+  verifyToken: {
+    type: String,
+    default: null,
+  },
+  verify: {
+    type: String,
+    default: false,
+  },
+  permission: {
+    type: String,
+    default: "Admin",
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

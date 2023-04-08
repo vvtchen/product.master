@@ -54,7 +54,7 @@ mongoose
   .catch((err) => console.error("Error connecting to database:", err));
 
 const User = require("./User");
-const Admin = require("./Admin");
+const InviteUser = require("./invite");
 
 ///mysql database
 const mysql = require("mysql2");
@@ -84,7 +84,11 @@ const schema = Joi.object({
 /**
  In this way we can make multiple validation in another file and then validete data in different purpose
  */
-const { registerValidation, loginValidation } = require("./auth");
+const {
+  registerValidation,
+  loginValidation,
+  inviteValidation,
+} = require("./auth");
 
 const { genSalt } = require("bcryptjs");
 
@@ -99,7 +103,17 @@ const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
 ///route
-
+const send = require("./script/sendMail");
+app.get("/test", (req, res) => {
+  const mailOptions = {
+    from: "productmastertest@gmail.com",
+    to: "s87041678914@gmail.com",
+    subject: "Please verify your email address",
+    html: "<a>HTML version of the message</a>",
+  };
+  send(mailOptions);
+  res.send("success");
+});
 //log out route
 app.get("/logout", (req, res) => {
   // Clear the auth-token cookie
@@ -110,6 +124,8 @@ app.get("/logout", (req, res) => {
     .clearCookie("user");
   res.status(200).redirect("/login");
 });
+
+const nodemailer = require("nodemailer");
 
 // register route;
 app.get("/register", (req, res) => {
@@ -135,27 +151,41 @@ app.post("/register", async (req, res, next) => {
   //hash the password
   const salt = await bcrypt.genSalt(10);
   const hashPassword = await bcrypt.hash(req.body.password, salt);
-
+  const verifyToken = jwt.sign(
+    { email: req.body.email },
+    process.env.Token_Secret,
+    { expiresIn: "1d" }
+  );
   const user = new User({
     company: req.body.company,
     name: req.body.name,
     email: req.body.email,
     password: hashPassword,
+    verifyToken: verifyToken,
   });
 
-  const admin = new Admin({
-    company: req.body.company,
-    name: req.body.name,
-    email: req.body.email,
-    password: hashPassword,
-  });
-  try {
-    const savedUser = await user.save();
-    const adminUser = await admin.save();
-    res.redirect("/login");
-  } catch (err) {
-    res.status(400).send(err);
+  const savedUser = await user.save();
+  const url = `${process.env.baseUrl}/verify?token=${verifyToken}`;
+  const mailOptions = {
+    from: "productmastertest@gmail.com",
+    to: `${req.body.email}`,
+    subject: "Please verify your email address",
+    html: `<a href= ${url}> Click to verify </a>`,
+  };
+  send(mailOptions);
+  res.send("Please verify yout mail");
+});
+
+app.get("/verify", async (req, res) => {
+  const token = req.query.token;
+  const existUser = await User.findOne({ verifyToken: token });
+  if (!existUser) {
+    return res.send("Error Varify Token");
   }
+  existUser.verify = true;
+  existUser.verifyToken = null;
+  await existUser.save();
+  res.send("Your account has been verified");
 });
 
 // login
@@ -171,11 +201,11 @@ app.post("/login", async (req, res, next) => {
   }
 
   //find user in database
-  const existUser = await User.findOne({ email: req.body.email });
+
+  const existUser = await User.findOne({ email: req.body.email, verify: true });
   if (!existUser) {
     return res.status(400).send("Email or Password is wrong");
   }
-  console.log(existUser);
 
   //compare the password with hashpassword
   const hashPassword = bcrypt.compare(req.body.password, existUser.password);
@@ -185,54 +215,24 @@ app.post("/login", async (req, res, next) => {
 
   const token = jwt.sign({ _id: existUser._id }, process.env.Token_Secret);
   const expirationTime = new Date(Date.now() + 1000 * 60 * 60 * 24);
-  const existAdmin = await Admin.findOne({ email: req.body.email });
 
-  if (existAdmin) {
-    const adminToken = jwt.sign(
-      { _id: existAdmin._id },
-      process.env.Token_Secret
-    );
-    res
-      .cookie("auth-token", token, {
-        httpOnly: true,
-        secure: true,
-        expires: expirationTime,
-      })
-      .cookie("user", existUser.name, {
-        httpOnly: true,
-        secure: true,
-        expires: expirationTime,
-      })
-      .cookie("company", existUser.company, {
-        httpOnly: true,
-        secure: true,
-        expires: expirationTime,
-      })
-      .cookie("permission", adminToken, {
-        httpOnly: true,
-        secure: true,
-        expires: expirationTime,
-      })
-      .redirect("index.html");
-  } else {
-    res
-      .cookie("auth-token", token, {
-        httpOnly: true,
-        secure: true,
-        expires: expirationTime,
-      })
-      .cookie("user", existUser.name, {
-        httpOnly: true,
-        secure: true,
-        expires: expirationTime,
-      })
-      .cookie("company", existUser.company, {
-        httpOnly: true,
-        secure: true,
-        expires: expirationTime,
-      })
-      .redirect("index.html");
-  }
+  res
+    .cookie("auth-token", token, {
+      httpOnly: true,
+      secure: true,
+      expires: expirationTime,
+    })
+    .cookie("user", existUser.name, {
+      httpOnly: true,
+      secure: true,
+      expires: expirationTime,
+    })
+    .cookie("company", existUser.company, {
+      httpOnly: true,
+      secure: true,
+      expires: expirationTime,
+    })
+    .redirect("index.html");
 });
 
 /// verify token middleware
@@ -254,50 +254,90 @@ app.use("/script", express.static(path.join(__dirname, "/script")));
 //Company
 app.get("/company", async (req, res) => {
   const users = await User.find({ company: req.cookies["company"] });
-
-  res.render("company", {
-    users,
-  });
+  const user = await User.findOne({ name: req.cookies["user"] });
+  res.render("company", { users, user });
 });
 
-const admin = require("./adminToken");
-//add user to company
-app.post("/registerUser", admin, async (req, res, next) => {
-  //check if the data is validate
-  const company = req.cookies["company"];
-  const data = {
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    company: company,
-  };
-
-  const { error } = registerValidation(data);
+//invite user to company
+app.post("/registerUser", async (req, res, next) => {
+  const { error } = inviteValidation(req.body);
   if (error) {
     return res.status(400).json({ err: error.details[0].message });
   }
-
-  //check if the data is already used?
-  const exist = await User.findOne({ email: data.email });
-  if (exist) {
-    return res.status(400).json({ err: `Email already existed` });
+  const company = req.cookies["company"];
+  const isAdmin = await User.findOne({
+    name: req.cookies["user"],
+    company: company,
+    permission: "Admin",
+  });
+  if (!isAdmin) {
+    return res.status(400).json({ err: "Only admin can add user" });
   }
-  //hash the password
+  const check = await User.findOne({ email: req.body.email });
+  if (check) {
+    return res.status(200).json({ err: "Email already existed" });
+  }
+
+  const token = jwt.sign({ email: req.body.email }, process.env.Token_Secret, {
+    expiresIn: "1d",
+  });
+
+  const invite = new InviteUser({
+    email: req.body.email,
+    company: company,
+    verifyToken: token,
+  });
+  const savedInvite = await invite.save();
+  const url = `${process.env.baseUrl}/invite?token=${token}`;
+  const mailOptions = {
+    from: "productmastertest@gmail.com",
+    to: `${req.body.email}`,
+    subject: `You are invited to Product Master by ${company}`,
+    html: `<a href= ${url}> Click to verify </a>`,
+  };
+  send(mailOptions);
+  res
+    .status(400)
+    .json({ msg: `Invitation has been sent to ${req.body.email}` });
+});
+
+app.get("/invite", async (req, res) => {
+  const token = req.query.token;
+  const user = await InviteUser.findOne({ verifyToken: token });
+  if (!user) {
+    return res.send("You are not invited by the Administrator");
+  } else {
+    user.verifyToken = null;
+    await user.save();
+    res.render("invite", { user });
+  }
+});
+
+app.post("/inviteRegister", async (req, res) => {
+  const { error } = registerValidation(req.body);
+  if (error) {
+    return res.status(400).send(error.details[0].message);
+  }
+  const exist = await User.findOne({ email: req.body.email });
+  if (exist) {
+    return res.status(400).send("Email already exists");
+  }
   const salt = await bcrypt.genSalt(10);
-  const hashPassword = await bcrypt.hash(data.password, salt);
+  const hashPassword = await bcrypt.hash(req.body.password, salt);
 
   const user = new User({
-    company: company,
-    name: data.name,
-    email: data.email,
+    company: req.body.company,
+    name: req.body.name,
+    email: req.body.email,
     password: hashPassword,
+    verify: true,
+    permission: "User",
   });
-  try {
-    const savedUser = await user.save();
-    res.status(200).json({ user: user.name, email: user.email });
-  } catch (err) {
-    res.status(400).send(err);
-  }
+
+  const savedUser = await user.save();
+  res.send(
+    `Welcome, ${req.body.name}. You are now allowed to enter product master`
+  );
 });
 
 //import products info by templates
@@ -820,10 +860,9 @@ app.put("/priceUpdate", (req, res) => {
 //searchProduct
 app.get("/search", (req, res) => {
   const product = req.query.product;
-  const searchBy = req.query.searchBy;
   const company = req.cookies["company"];
   const query = `SELECT id, image_url, modelNO, title, vendorName, vendorPrice, incoming, sellPrice, packageNo, packageCost, creationDate, (GMS / totalSoldUnits)AS avgPrice, GMS, totalSoldUnits, totalPurchaseUnits, totalPurchaseAmount,cart1, cart2, cart3, (totalPurchaseUnits - totalSoldUnits) AS inventory, remark,
-  tag1, tag2, tag3, tag4, tag5 from productInfo where ${searchBy} like '%${product}%' and company = '${company}'`;
+  tag1, tag2, tag3, tag4, tag5 from productInfo where (title like '%${product}%' or id like '${product}%') and company = '${company}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     res.render("product", { data });

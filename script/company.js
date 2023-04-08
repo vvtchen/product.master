@@ -5,14 +5,9 @@ const expand = () => {
 };
 
 const add = async () => {
-  const name = document.getElementById("name").value;
   const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
   const data = {
-    name: name,
     email: email,
-    password: password,
   };
   const response = await fetch("/registerUser", {
     method: "POST",
@@ -26,18 +21,20 @@ const add = async () => {
     document.getElementById("name").value = "";
     document.getElementById("email").value = "";
     document.getElementById("password").value = "";
-  } else {
-    const table = document.getElementById("table");
-    const row = table.insertRow();
-    const user = row.insertCell(0);
-    user.textContent = result.user;
-    const Email = row.insertCell(1);
-    Email.textContent = result.email;
-    document.getElementById("msg").style.display = "none";
-    document.getElementById("name").value = "";
-    document.getElementById("email").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("btn").style.display = "inline-block";
-    document.getElementById("input").style.display = "none";
   }
+
+  document.getElementById(
+    "msg"
+  ).innerHTML = `Invitation has been sent to ${email}`;
+  document.getElementById("name").value = "";
+  document.getElementById("email").value = "";
+  document.getElementById("password").value = "";
 };
+
+const user = () => {
+  const user = document.getElementById("user").textContent;
+  const permission = document.getElementById("permission");
+  console.log(user);
+};
+
+user();
