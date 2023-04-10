@@ -72,27 +72,15 @@ con.connect(function (err) {
   console.log("Connected to mysql!");
 });
 
-/// data validation hapi/joi
-const Joi = require("@hapi/joi");
-const schema = Joi.object({
-  name: Joi.string().min(3).required(),
-  email: Joi.string().min(6).max(300).required().email(),
-  password: Joi.string().min(6).max(1024).required(),
-});
-
 /// use function to make validation
-/**
- In this way we can make multiple validation in another file and then validete data in different purpose
- */
 const {
   registerValidation,
   loginValidation,
   inviteValidation,
 } = require("./auth");
 
-const { genSalt } = require("bcryptjs");
-
 // hash password module
+const { genSalt } = require("bcryptjs");
 const bcrypt = require("bcryptjs");
 
 //create and assign json web token module
@@ -189,8 +177,58 @@ app.get("/verify", async (req, res) => {
 });
 
 // login
+
+app.get("/forgetPassword", (req, res) => {
+  res.render("forgetPassword");
+});
+
+app.post("/forgetPassword", async (req, res) => {
+  const email = req.body.email;
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    return res.send("Invalid Email");
+  }
+  const token = jwt.sign({ _id: user._id }, process.env.Token_Secret, {
+    expiresIn: "1d",
+  });
+
+  user.verifyToken = token;
+  await user.save();
+  const url = `${process.env.baseUrl}/resetPassword?token=${token}`;
+  const mailOptions = {
+    from: "productmastertest@gmail.com",
+    to: `${req.body.email}`,
+    subject: "Password Reset",
+    html: `<a href= ${url}> Click to reset </a>`,
+  };
+  send(mailOptions);
+  res.send("Password reset link is already sent to your email");
+});
 app.get("/login", (req, res) => {
   res.render("login");
+});
+
+app.get("/resetPassword", async (req, res) => {
+  const token = req.query.token;
+  const existUser = await User.findOne({ verifyToken: token });
+  if (!existUser) {
+    return res.send("You are not allow to reset password");
+  }
+  res.render("resetPassword", { token: token });
+});
+
+app.post("/resetPassword", async (req, res) => {
+  const token = req.query.token;
+  const salt = await bcrypt.genSalt(10);
+  const hashPassword = await bcrypt.hash(req.body.password, salt);
+  const existUser = await User.findOne({ verifyToken: token });
+  if (!existUser) {
+    return res.send("You are not allow to reset password");
+  }
+  existUser.password = hashPassword;
+  existUser.verifyToken = null;
+  await existUser.save();
+  res.send("Password changed!");
 });
 
 app.post("/login", async (req, res, next) => {
@@ -208,7 +246,10 @@ app.post("/login", async (req, res, next) => {
   }
 
   //compare the password with hashpassword
-  const hashPassword = bcrypt.compare(req.body.password, existUser.password);
+  const hashPassword = await bcrypt.compare(
+    req.body.password,
+    existUser.password
+  );
   if (!hashPassword) {
     return res.status(400).send("Invalid User");
   }
@@ -252,7 +293,7 @@ app.use(express.static("public"));
 app.use("/script", express.static(path.join(__dirname, "/script")));
 
 //Company
-app.get("/company", async (req, res) => {
+app.get("/account", async (req, res) => {
   const users = await User.find({ company: req.cookies["company"] });
   const user = await User.findOne({ name: req.cookies["user"] });
   res.render("company", { users, user });
@@ -270,35 +311,41 @@ app.post("/registerUser", async (req, res, next) => {
     company: company,
     permission: "Admin",
   });
+  console.log(isAdmin);
   if (!isAdmin) {
     return res.status(400).json({ err: "Only admin can add user" });
-  }
-  const check = await User.findOne({ email: req.body.email });
-  if (check) {
-    return res.status(200).json({ err: "Email already existed" });
-  }
+  } else {
+    const check = await User.findOne({ email: req.body.email });
+    if (check) {
+      return res.status(200).json({ err: "Email already existed" });
+    }
 
-  const token = jwt.sign({ email: req.body.email }, process.env.Token_Secret, {
-    expiresIn: "1d",
-  });
+    const token = jwt.sign(
+      { email: req.body.email },
+      process.env.Token_Secret,
+      {
+        expiresIn: "1d",
+      }
+    );
 
-  const invite = new InviteUser({
-    email: req.body.email,
-    company: company,
-    verifyToken: token,
-  });
-  const savedInvite = await invite.save();
-  const url = `${process.env.baseUrl}/invite?token=${token}`;
-  const mailOptions = {
-    from: "productmastertest@gmail.com",
-    to: `${req.body.email}`,
-    subject: `You are invited to Product Master by ${company}`,
-    html: `<a href= ${url}> Click to verify </a>`,
-  };
-  send(mailOptions);
-  res
-    .status(400)
-    .json({ msg: `Invitation has been sent to ${req.body.email}` });
+    const invite = new InviteUser({
+      email: req.body.email,
+      company: company,
+      verifyToken: token,
+    });
+    const savedInvite = await invite.save();
+    const url = `${process.env.baseUrl}/invite?token=${token}`;
+    const mailOptions = {
+      from: "productmastertest@gmail.com",
+      to: `${req.body.email}`,
+      subject: `You are invited to Product Master by ${company}`,
+      html: `<a href= ${url}> Click to set up your account </a>`,
+    };
+    send(mailOptions);
+    res
+      .status(400)
+      .json({ msg: `Invitation has been sent to ${req.body.email}` });
+  }
 });
 
 app.get("/invite", async (req, res) => {
@@ -560,15 +607,15 @@ app.post(
           if (error) {
             console.error(error);
           } else {
+            const company = req.cookies["company"];
             const checkPO = await Query(
-              `select id from PO where id = '${rows[0][2]}'`
+              `select id from PO where id = '${rows[0][2]}' and vendorName = '${rows[0][0]}' and company = '${company}'`
             );
             if (checkPO.length == 0) {
               res.render("importInvoiceError", {
                 errorMessage: "Cannot find PO Number",
               });
             } else {
-              const company = req.cookies["company"];
               for (let row of rows) {
                 row.push(company);
               }
@@ -1266,7 +1313,7 @@ app.put("/modifyProduct", (req, res) => {
 });
 
 //verify invoice
-app.post("/verifyInvoice", (req, res) => {
+app.put("/verifyInvoice", (req, res) => {
   const inv = req.body.invoice_id;
   const company = req.cookies["company"];
   const query = `update invoice set status = 'finished' where invoice_id = '${inv}' and company = '${company}'`;
@@ -1440,4 +1487,46 @@ app.get("/topProduct", (req, res) => {
 app.get("/download", (req, res) => {
   const fileName = req.query.file;
   res.download(__dirname + `/public/${fileName}`);
+});
+
+app.put("/adjustQ", (req, res) => {
+  const id = req.body.id;
+  const po = req.body.po_id;
+  const diff = req.body.diff;
+  const company = req.cookies["company"];
+  const query = `Update productInfo set incoming = incoming + ${Number(
+    diff
+  )} where id = '${id}' and company = '${company}'`;
+  con.query(query, (err, result) => {
+    if (err) throw err;
+  });
+
+  const query2 = `Update PO set quantity = quantity + ${Number(
+    diff
+  )} where product_id = '${id}' and company = '${company}'`;
+  con.query(query2, (err, result) => {
+    if (err) throw err;
+    res.status(200).send();
+  });
+});
+
+app.put("/adjustP", (req, res) => {
+  const id = req.body.id;
+  const po = req.body.po_id;
+  const diff = req.body.diff;
+  const company = req.cookies["company"];
+  const query = `Update productInfo set vendorPrice = vendorPrice + ${Number(
+    diff
+  )} where id = '${id}' and company = '${company}'`;
+  con.query(query, (err, result) => {
+    if (err) throw err;
+  });
+
+  const query2 = `Update PO set vendorPrice = vendorPrice + ${Number(
+    diff
+  )} where product_id = '${id}' and company = '${company}'`;
+  con.query(query2, (err, result) => {
+    if (err) throw err;
+    res.status(200).send();
+  });
 });

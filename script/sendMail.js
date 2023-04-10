@@ -8,7 +8,6 @@ const send = (mailOptions) => {
       pass: "nyroblowhxggpxhq",
     },
   });
-
   transporter.sendMail(mailOptions);
 };
 module.exports = send;

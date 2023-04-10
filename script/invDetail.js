@@ -2,7 +2,7 @@ async function verify(ele) {
   const inv = ele.value;
   const data = { invoice_id: inv };
   await fetch("/verifyInvoice", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
@@ -57,11 +57,34 @@ const alert = () => {
   for (let unit of units) {
     if (Number(unit.textContent) != 0) {
       unit.style.color = "red";
+      const icon = document.createElement("i");
+      icon.className = "fa fa-times";
+      unit.append(icon);
+    } else {
+      unit.textContent = "";
+      const icon = document.createElement("i");
+      unit.style.color = "green";
+      icon.className = "fa fa-check";
+      unit.append(icon);
     }
   }
   for (let p of price) {
     if (Number(p.textContent) > 0) {
       p.style.color = "red";
+      const icon = document.createElement("i");
+      icon.className = "fa fa-times";
+      p.append(icon);
+    } else if (Number(p.textContent) === 0) {
+      const icon = document.createElement("i");
+      p.textContent = "";
+      p.style.color = "green";
+      icon.className = "fa fa-check";
+      p.append(icon);
+    } else {
+      p.style.color = "green";
+      const icon = document.createElement("i");
+      icon.className = "fa fa-check";
+      p.append(icon);
     }
   }
 };
@@ -83,3 +106,75 @@ const totalProfit = () => {
 };
 
 totalProfit();
+
+const adjustQ = async (ele) => {
+  const po = document.getElementById("po_id").value;
+  let value = ele.value;
+  let index;
+  for (let i = 0; i < value.length; i++) {
+    if (value[i] == "#") {
+      index = i;
+    }
+  }
+  const id = value.slice(0, index);
+  const diff = Number(value.slice(index + 1));
+  const data = {
+    id: id,
+    diff: diff,
+    po_id: po,
+  };
+  await fetch("/adjustQ", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  ele.style.color = "green";
+  ele.removeAttribute("onclick");
+  ele.setAttribute("class", "fa fa-check");
+};
+
+const disable = () => {
+  const eles = document.getElementsByClassName("fa fa-gavel");
+  var ele = Array.from(eles);
+  while (ele.length > 0) {
+    let btn = ele.pop();
+    const value = btn.value;
+    for (let i = 0; i < value.length; i++) {
+      if (value[i] == "#") {
+        const diff = Number(value.slice(i + 1));
+        if (diff === 0) {
+          btn.style.color = "green";
+          btn.removeAttribute("onclick");
+          btn.setAttribute("class", "fa fa-check");
+        }
+      }
+    }
+  }
+};
+disable();
+
+const adjustP = async (ele) => {
+  const po = document.getElementById("po_id").value;
+  let value = ele.value;
+  let index;
+  for (let i = 0; i < value.length; i++) {
+    if (value[i] == "#") {
+      index = i;
+    }
+  }
+  const id = value.slice(0, index);
+  const diff = Number(value.slice(index + 1));
+  const data = {
+    id: id,
+    diff: diff,
+    po_id: po,
+  };
+  await fetch("/adjustP", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  ele.style.color = "green";
+  ele.removeAttribute("onclick");
+  ele.setAttribute("class", "fa fa-check");
+};

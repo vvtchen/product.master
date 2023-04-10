@@ -45,7 +45,7 @@
             <a href="logout"><i class="fa fa-sign-out" style="font-size: 25px;"></i></a>
           </li>
           <li style="width: 2%; float: right; margin-right: 15px;" >
-          <a href="company"><i class="fa fa-user" style="font-size: 25px;"></i></a>
+          <a href="account"><i class="fa fa-user" style="font-size: 25px;"></i></a>
         </li>
           <li style="width: 2%; float: right; margin-right: 15px;" >
             <a href="cart"><i class="fa fa-shopping-cart" style="font-size: 25px;"></i></a>
@@ -74,30 +74,29 @@
     </body>
     <script src="/script/navBar.js"></script>
 </html>
-
-<div class="container">
-  <i class="fa fa-user-circle-o fa-5x" ></i>
-
-  
-      <p>User</p><br>
-      <p id="user"><%= user.name %></p><br>
-      <p>Account</p><br>
-      <p id="emailAccount"><%= user.email %></p><br>
-      <p>Company</p><br>
-      <p id="company"><%= user.company %></p><br>
- 
-
-  <a href="">Change Password</a>
+<h1>Account Info</h1>
+<div class="table-wrapper" style="width: 40%;">
+<table class="fl-table">
+  <tr>
+    <th>User</th>
+    <th>Email</th>
+    <th>Company</th>
+  </tr>
+  <tr>
+    <td id="user"><%= user.name %></td>
+    <td id="emailAccount"><%= user.email %></td>
+    <td id="company"><%= user.company %></td>
+  </tr>
+</table>
 </div>
-
-
-<h1  style="margin-left: 40%"><%= users[0].company%></h1>
-<div class="table-wrapper" style="margin-left: 40%; margin-top: 50px; position: fixed; max-width: 40%; width: 40%; overflow: scroll; max-height: 90%;">
+<h1>Mamber List of <%= users[0].company%></h1>
+<div class="table-wrapper" style="width: 40%;">
+  
     <table class="fl-table" id="table">
         <tr>
             <th>User Name</th>
             <th>Email</th>
-            <th>Permission Level</th>
+            <th>Role</th>
           </tr>
         <% for( user of users ) { %>
             <tr>
@@ -109,15 +108,12 @@
           
         
     </table>
-    <div id="input" style="display: none;">
-        <input type="email" name="email" id="email" placeholder="Email">
-        <input type="button" onclick="add()" value="Add">
-        <small id="msg" style="color: red;"></small>
-    </div>
-    <button onclick="expand()" id="btn">Invite User</button>
-    
-    
 </div>
+
+<h1 style="margin-bottom: 30px;">Invite New User</h1>
+    <input type="email" id="email" placeholder="example@gmail.com" autocomplete="off" required="required" style="height:35px; width: 35%; border-color: #2564cf; border-style: solid; border-radius: 10px; margin-left:70px; padding-left:10px; color: #2564cf"/>
+    <button type="submit" onclick="add()" style="height:35px; width: 70px; background-color: #2564cf; border: 0; border-radius: 10px;"><span style="color: #ffffff; font-weight: bold;">Invite</span></button>
+        <small id="msg" style="color: red;"></small>
 
 <script src="/script/company.js"></script>
 

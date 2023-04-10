@@ -1,9 +1,3 @@
-const expand = () => {
-  const container = document.getElementById("input");
-  container.style.display = "inline-block";
-  document.getElementById("btn").style.display = "none";
-};
-
 const add = async () => {
   const email = document.getElementById("email").value;
   const data = {
@@ -18,17 +12,13 @@ const add = async () => {
   const result = await response.json();
   if (result.err) {
     document.getElementById("msg").innerHTML = result.err;
-    document.getElementById("name").value = "";
     document.getElementById("email").value = "";
-    document.getElementById("password").value = "";
+  } else {
+    document.getElementById(
+      "msg"
+    ).innerHTML = `Invitation has been sent to ${email}`;
+    document.getElementById("email").value = "";
   }
-
-  document.getElementById(
-    "msg"
-  ).innerHTML = `Invitation has been sent to ${email}`;
-  document.getElementById("name").value = "";
-  document.getElementById("email").value = "";
-  document.getElementById("password").value = "";
 };
 
 const user = () => {
