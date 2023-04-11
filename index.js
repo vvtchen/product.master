@@ -28,6 +28,10 @@ const path = require("path");
 const readXlsxFile = require("read-excel-file/node");
 const multer = require("multer");
 
+// static method allow as to static all files under the filename
+app.use(express.static("public"));
+app.use("/script", express.static(path.join(__dirname, "/script")));
+
 //modile required to upload file from browser
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -91,6 +95,7 @@ const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
 ///route
+
 const send = require("./script/sendMail");
 app.get("/test", (req, res) => {
   const mailOptions = {
@@ -272,8 +277,8 @@ app.post("/login", async (req, res, next) => {
       httpOnly: true,
       secure: true,
       expires: expirationTime,
-    })
-    .redirect("index.html");
+    });
+  return res.redirect("/index.html");
 });
 
 /// verify token middleware
@@ -287,10 +292,6 @@ app.use(
 const { Template } = require("ejs");
 const { result } = require("@hapi/joi/lib/base");
 const { url } = require("inspector");
-
-// static method allow as to static all files under the filename
-app.use(express.static("public"));
-app.use("/script", express.static(path.join(__dirname, "/script")));
 
 //Company
 app.get("/account", async (req, res) => {
@@ -343,7 +344,7 @@ app.post("/registerUser", async (req, res, next) => {
     };
     send(mailOptions);
     res
-      .status(400)
+      .status(200)
       .json({ msg: `Invitation has been sent to ${req.body.email}` });
   }
 });
@@ -419,7 +420,7 @@ app.post(
           if (err) {
             throw err;
           }
-          res.render("productImport", {
+          return res.render("productImport", {
             msg: `Created ${result.affectedRows} Products`,
           });
         });
