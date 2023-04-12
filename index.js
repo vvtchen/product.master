@@ -28,10 +28,6 @@ const path = require("path");
 const readXlsxFile = require("read-excel-file/node");
 const multer = require("multer");
 
-// static method allow as to static all files under the filename
-app.use(express.static("public"));
-app.use("/script", express.static(path.join(__dirname, "/script")));
-
 //modile required to upload file from browser
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -288,6 +284,10 @@ app.use(
     path: ["/login.css"],
   })
 );
+
+// static method allow as to static all files under the filename
+app.use(express.static("public"));
+app.use("/script", express.static(path.join(__dirname, "/script")));
 
 const { Template } = require("ejs");
 const { result } = require("@hapi/joi/lib/base");
