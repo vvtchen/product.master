@@ -3,7 +3,7 @@ const { response, query } = require("express");
 const express = require("express");
 const app = express();
 
-app.listen(3000, () => console.log("listening at 3000"));
+app.listen(8080, () => console.log("listening at 8080"));
 
 //.env file
 const dotenv = require("dotenv");
