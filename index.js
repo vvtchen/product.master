@@ -25,7 +25,6 @@ var { unless } = require("express-unless");
 //modules to read excel file
 const fs = require("fs");
 const path = require("path");
-const readXlsxFile = require("read-excel-file/node");
 const multer = require("multer");
 
 //modile required to upload file from browser
@@ -388,186 +387,96 @@ app.post("/inviteRegister", async (req, res) => {
   );
 });
 
-//import products info by templates
-app.post(
-  "/import-excel",
-  uploadFile.single("import-excel"),
-  async (req, res, next) => {
-    function importFileToDb(exFile) {
-      readXlsxFile(exFile).then(async (rows) => {
-        rows.shift();
-        if (rows.length == 0) {
-          return res.render("importProductError", {
-            errorMessage: "Can't find any data",
-          });
-        }
-
-        const checkExist = await Query(
-          `Select vendorName from vendor where vendorName = '${rows[0][0]}'`
-        );
-        if (checkExist.length === 0) {
-          return res.render("importProductError", {
-            errorMessage: "Can't find vendor with this name",
-          });
-        }
-        const company = req.cookies["company"];
-        for (let row of rows) {
-          row.push(company);
-        }
-        let query =
-          "INSERT INTO productInfo (vendorName, title, modelNO, vendorPrice, sellPrice, packageNo, packageCost, image_url, company) VALUES ?";
-        con.query(query, [rows], function (err, result) {
-          if (err) {
-            throw err;
-          }
-          return res.render("productImport", {
-            msg: `Created ${result.affectedRows} Products`,
-          });
-        });
-      });
+app.post("/uploadProduct", async (req, res) => {
+  const company = req.cookies["company"];
+  const rows = req.body.data;
+  const checkExist = await Query(
+    `Select vendorName from vendor where vendorName = '${rows[0][0]}'`
+  );
+  if (checkExist.length === 0) {
+    return res.json({
+      error:
+        "Can't find corresponding vendor, please check the vendor name or create the vendor name first!",
+    });
+  } else {
+    for (let row of rows) {
+      row.push(company);
     }
-    async function checkValid(exFile) {
-      let result = true;
-      let rows = await readXlsxFile(exFile);
-      rows.shift();
-      for (let i = 0; i < rows.length; i++) {
-        if (rows[i].length !== 8) {
-          result = false;
-        } else {
-          for (let j = 0; j < rows[i].length; j++) {
-            if (rows[i][j] == null) {
-              result = false;
-            }
-          }
-        }
+    let query =
+      "INSERT INTO productInfo (vendorName, title, modelNO, vendorPrice, sellPrice, packageNo, packageCost, image_url, company) VALUES ?";
+    con.query(query, [rows], function (err, result) {
+      if (err) {
+        throw err;
       }
-      return result;
-    }
-
-    let signal = await checkValid(__dirname + "/uploads/" + req.file.filename);
-    if (signal) {
-      importFileToDb(__dirname + "/uploads/" + req.file.filename);
-      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
-        console.log(err);
+      return res.status(200).json({
+        success: `Successfully created ${result.affectedRows} products`,
       });
-    } else {
-      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
-        console.log(err);
-      });
-      res.render("importProductError", {
-        errorMessage: "Error Template Format",
-      });
-    }
+    });
   }
-);
+});
 
-//import sales data
-app.post(
-  "/import-sales",
-  uploadFile.single("import-excel"),
-  async function (req, res, next) {
-    function importSales(exFile) {
-      readXlsxFile(exFile).then(async (rows) => {
-        rows.shift();
-        if (rows.length == 0) {
-          return res.render("importProductError", {
-            errorMessage: "Can't find any data",
-          });
-        }
-        const company = req.cookies["company"];
-        for (let row of rows) {
-          let id = row[1];
-          let quantity = row[4];
-          let cogs = 0;
-          let results = await getCogs(id);
-          let vendor = await getVendor(id);
-          for (let result of results) {
-            if (quantity <= result.inventory) {
-              cogs += quantity * result.purchasePrice;
-              row.push(row[3] * row[4] - cogs);
-              const update = `update invoice set soldUnits = soldUnits + ${quantity}, profit = profit + ${
-                quantity * row[3]
-              } where invoice_id = '${
-                result.invoice_id
-              }' and product_id = '${id}'`;
-              con.query(update, (err, data) => {
-                if (err) throw err;
-              });
-              break;
-            } else {
-              cogs += result.inventory * result.purchasePrice;
-              const update = `update invoice set soldUnits = soldUnits + ${
-                result.inventory
-              }, profit = profit + ${
-                result.inventory * row[3]
-              } where invoice_id = '${
-                result.invoice_id
-              }' and product_id = '${id}'`;
-              con.query(update, (err, data) => {
-                if (err) throw err;
-              });
-              quantity -= result.inventory;
-            }
-          }
-          row.push(vendor[0].vendorName);
-          row.push(company);
-        }
-        con.connect((error) => {
-          if (error) {
-            console.error(error);
-          } else {
-            let query = `INSERT INTO sales (sales_id, product_id, title, soldPrice, soldUnits, sales_date, profit, vendorName, company) VALUES ?`;
-            con.query(query, [rows], function (err, result) {
-              if (err) throw err;
-            });
-
-            for (let i = 0; i < rows.length; i++) {
-              const update = `UPDATE productInfo SET totalSoldUnits = totalSoldUnits + ${Number(
-                rows[i][4]
-              )}, GMS = GMS + ${
-                Number(rows[i][3]) * Number(rows[i][4])
-              } WHERE id = ${Number(rows[i][1])}`;
-              con.query(update, (err, data) => {
-                if (err) throw err;
-              });
-            }
-            res.redirect("/index.html");
-          }
+app.post("/uploadSales", async (req, res) => {
+  const company = req.cookies["company"];
+  const rows = req.body.data;
+  for (let row of rows) {
+    let id = row[1];
+    let quantity = row[4];
+    let cogs = 0;
+    let results = await getCogs(id);
+    if (results.length === 0) {
+      return res.status(200).json({ error: "Can't find inventroy" });
+    }
+    let vendor = await getVendor(id);
+    for (let result of results) {
+      if (quantity <= result.inventory) {
+        cogs += quantity * result.purchasePrice;
+        row.push(row[3] * row[4] - cogs);
+        const update = `update invoice set soldUnits = soldUnits + ${quantity}, profit = profit + ${
+          quantity * row[3]
+        } where invoice_id = '${result.invoice_id}' and product_id = '${id}'`;
+        con.query(update, (err, data) => {
+          if (err) throw err;
         });
-      });
-    }
-    async function checkValid(exFile) {
-      let result = true;
-      let rows = await readXlsxFile(exFile); // Wait for the file to be read
-      rows.shift();
-      for (let i = 0; i < rows.length; i++) {
-        if (rows[i].length !== 6) {
-          result = false;
-        } else {
-          for (let j = 0; j < rows[i].length; j++) {
-            if (rows[i][j] == null) {
-              result = false;
-            }
-          }
-        }
+        break;
+      } else {
+        cogs += result.inventory * result.purchasePrice;
+        const update = `update invoice set soldUnits = soldUnits + ${
+          result.inventory
+        }, profit = profit + ${result.inventory * row[3]} where invoice_id = '${
+          result.invoice_id
+        }' and product_id = '${id}'`;
+        con.query(update, (err, data) => {
+          if (err) throw err;
+        });
+        quantity -= result.inventory;
       }
-      return result;
     }
-
-    let signal = await checkValid(__dirname + "/uploads/" + req.file.filename);
-    if (signal) {
-      importSales(__dirname + "/uploads/" + req.file.filename);
-      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
-        console.log(err);
-      });
-    } else {
-      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
-        console.log(err);
-      });
-      res.render("importSalesError", { errorMessage: "Error Template Format" });
-    }
+    row.push(vendor[0].vendorName);
+    row.push(company);
   }
-);
+  con.connect((error) => {
+    if (error) {
+      console.error(error);
+    } else {
+      let query = `INSERT INTO sales (sales_id, product_id, title, soldPrice, soldUnits, sales_date, profit, vendorName, company) VALUES ?`;
+      con.query(query, [rows], function (err, result) {
+        if (err) throw err;
+      });
+
+      for (let i = 0; i < rows.length; i++) {
+        const update = `UPDATE productInfo SET totalSoldUnits = totalSoldUnits + ${Number(
+          rows[i][4]
+        )}, GMS = GMS + ${
+          Number(rows[i][3]) * Number(rows[i][4])
+        } WHERE id = ${Number(rows[i][1])}`;
+        con.query(update, (err, data) => {
+          if (err) throw err;
+        });
+      }
+      res.status(200).json({ success: "Successfully import sales records" });
+    }
+  });
+});
 
 //get cogs
 async function getCogs(id) {
@@ -591,101 +500,48 @@ async function getVendor(id) {
   });
 }
 
-//import invoice data
-app.post(
-  "/import-invoice",
-  uploadFile.single("import-excel"),
-  async (req, res, next) => {
-    function importInvoice(exFile) {
-      readXlsxFile(exFile).then((rows) => {
-        rows.shift();
-        if (rows.length == 0) {
-          return res.render("importProductError", {
-            errorMessage: "Can't find any data",
-          });
-        }
-        con.connect(async (error) => {
-          if (error) {
-            console.error(error);
-          } else {
-            const company = req.cookies["company"];
-            const checkPO = await Query(
-              `select id from PO where id = '${rows[0][2]}' and vendorName = '${rows[0][0]}' and company = '${company}'`
-            );
-            if (checkPO.length == 0) {
-              res.render("importInvoiceError", {
-                errorMessage: "Cannot find PO Number",
-              });
-            } else {
-              for (let row of rows) {
-                row.push(company);
-              }
-              let query =
-                "INSERT INTO invoice (vendorName, invoice_id, po_id, product_id, purchaseUnits, purchasePrice, invoice_date, company) VALUES ?";
-              con.query(query, [rows], function (err, result) {
-                if (err) throw err;
-              });
-              for (let i = 0; i < rows.length; i++) {
-                const updateProductInfo = `UPDATE productInfo SET incoming = incoming - ${Number(
-                  rows[i][4]
-                )}, totalPurchaseUnits = totalPurchaseUnits + ${Number(
-                  rows[i][4]
-                )}, totalPurchaseAmount = totalPurchaseAmount + ${
-                  Number(rows[i][4]) * Number(rows[i][5])
-                } WHERE id = '${Number(rows[i][3])}'`;
-                const updatePO = `UPDATE PO SET status = 'received', invoiceID = '${
-                  rows[i][1]
-                }' WHERE product_id = ${Number(rows[i][3])} AND id = '${
-                  rows[i][2]
-                }'`;
-                con.query(updateProductInfo, (err, result) => {
-                  if (err) throw err;
-                });
-                con.query(updatePO, (err, result) => {
-                  if (err) throw err;
-                });
-              }
-
-              res.redirect("/index.html");
-            }
-          }
-        });
-      });
-    }
-    async function checkValid(exFile) {
-      let result = true;
-      let rows = await readXlsxFile(exFile); // Wait for the file to be read
-      rows.shift();
-      for (let i = 0; i < rows.length; i++) {
-        if (rows[i].length !== 7) {
-          result = false;
-        } else {
-          for (let j = 0; j < rows[i].length; j++) {
-            if (rows[i][j] == null) {
-              result = false;
-            }
-          }
-        }
-      }
-      return result;
-    }
-
-    let signal = await checkValid(__dirname + "/uploads/" + req.file.filename);
-    if (signal) {
-      importInvoice(__dirname + "/uploads/" + req.file.filename);
-      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
-        console.log(err);
-      });
-    } else {
-      fs.unlink(__dirname + "/uploads/" + req.file.filename, (err) => {
-        console.log(err);
-      });
-      res.render("importInvoiceError", {
-        errorMessage: "Error Template Format",
-      });
-    }
+app.post("/uploadInvoice", async (req, res) => {
+  const company = req.cookies["company"];
+  const rows = req.body.data;
+  const checkPO = await Query(
+    `select id from PO where id = '${rows[0][2]}' and vendorName = '${rows[0][0]}' and company = '${company}'`
+  );
+  if (checkPO.length === 0) {
+    return res
+      .status(200)
+      .json({ error: `Can't find corresponding purchase order!` });
   }
-);
+
+  for (let row of rows) {
+    row.push(company);
+  }
+
+  let query =
+    "INSERT INTO invoice (vendorName, invoice_id, po_id, product_id, purchaseUnits, purchasePrice, invoice_date, company) VALUES ?";
+  con.query(query, [rows], function (err, result) {
+    if (err) throw err;
+  });
+
+  for (let i = 0; i < rows.length; i++) {
+    const updateProductInfo = `UPDATE productInfo SET incoming = incoming - ${Number(
+      rows[i][4]
+    )}, totalPurchaseUnits = totalPurchaseUnits + ${Number(
+      rows[i][4]
+    )}, totalPurchaseAmount = totalPurchaseAmount + ${
+      Number(rows[i][4]) * Number(rows[i][5])
+    } WHERE id = '${Number(rows[i][3])}'`;
+    const updatePO = `UPDATE PO SET status = 'received', invoiceID = '${
+      rows[i][1]
+    }' WHERE product_id = ${Number(rows[i][3])} AND id = '${rows[i][2]}'`;
+    con.query(updateProductInfo, (err, result) => {
+      if (err) throw err;
+    });
+    con.query(updatePO, (err, result) => {
+      if (err) throw err;
+    });
+  }
+  return res.status(200).json({ success: "Successfully upload invoice" });
+});
 
 //add to cart
 app.put("/addToCart", (req, res) => {

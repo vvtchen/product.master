@@ -1,3 +1,21 @@
+function count() {
+  const quantity = document.getElementsByClassName("quantity");
+  const price = document.getElementsByClassName("price");
+  const count = quantity.length;
+  let amount = 0;
+  let units = 0;
+  for (let i = 0; i < price.length; i++) {
+    let sum = Number(price[i].innerHTML) * Number(quantity[i].innerHTML);
+    amount += sum;
+    let unit = Number(quantity[i].innerHTML);
+    units += unit;
+  }
+  document.getElementById("sku").innerHTML = count;
+  document.getElementById("quantity").innerHTML = units;
+  document.getElementById("amount").innerHTML = `$${amount}`;
+}
+count();
+
 async function verify(ele) {
   const inv = ele.value;
   const data = { invoice_id: inv };
@@ -8,23 +26,6 @@ async function verify(ele) {
   });
   ele.style = "background-color: #2564cf; color: white;";
 }
-function count() {
-  const row = document.getElementsByClassName("rowData");
-  const quantity = document.getElementsByClassName("quantity");
-  const price = document.getElementsByClassName("price");
-  let amount = 0;
-  let units = 0;
-  for (let i = 0; i < price.length; i++) {
-    let sum = Number(price[i].innerHTML) * Number(quantity[i].innerHTML);
-    amount += sum;
-    let unit = Number(quantity[i].innerHTML);
-    units += unit;
-  }
-  document.getElementById("sku").innerHTML = row.length;
-  document.getElementById("quantity").innerHTML = units;
-  document.getElementById("amount").innerHTML = `$${amount}`;
-}
-count();
 
 const filter = (ele) => {
   const inventory = document.getElementsByClassName("inventory");
@@ -61,7 +62,6 @@ const alert = () => {
       icon.className = "fa fa-times";
       unit.append(icon);
     } else {
-      unit.textContent = "";
       const icon = document.createElement("i");
       unit.style.color = "green";
       icon.className = "fa fa-check";
@@ -76,7 +76,6 @@ const alert = () => {
       p.append(icon);
     } else if (Number(p.textContent) === 0) {
       const icon = document.createElement("i");
-      p.textContent = "";
       p.style.color = "green";
       icon.className = "fa fa-check";
       p.append(icon);

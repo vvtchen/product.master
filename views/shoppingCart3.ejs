@@ -4,189 +4,226 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="product.css">
+    <link rel="stylesheet" href="navBar.css">
     <link rel="stylesheet" href="model.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
     <link rel="stylesheet" href="createForm.css">
     <title>product</title>
 </head>
 <body>
-    <header class="header">
-        <nav>
+    <div class="wrapper">
+        <header>
+          <a href="/index.html">Easy Product</a>
+          <form action="/search" class="search">
+            <input
+              type="search"
+              class="searchBar"
+              name="product"
+              placeholder="Search... "
+            />
+          </form>
+          <nav>
             <ul>
-                <li style="width: 5%; margin-top: px;" >
-                    <span style="cursor: pointer; font-size: 26px;" onclick="openNav()"> &#9776</span>
-                  </li>
-              <li style=" margin:0px auto; width: 85%;">
-                
-                <form action="/search" style="margin: 0 auto;">
-                  <input
-                    type="search"
-                    class="searchBar"
-                    name="product";
-                    width="100%"
-                  />
-                  <select name="searchBy" class="searchBar">
-                    <option value="title" class="searchBar">Product Title</option>
-                    <option value="id" class="searchBar">Product ID</option>
-                  </select>
-    
-                </form>
+              <li>
+                <a href="cart"><i class="fa fa-shopping-cart"></i></a>
               </li>
-              <li style="width: 3%; float: right; margin-right: 15px;">
-                <a href="logout"><i class="fa fa-sign-out" style="font-size: 25px;"></i></a>
+              <li>
+                <a href="account"><i class="fa fa-user"></i></a>
               </li>
-              <li style="width: 3%; float: right; margin-right: 15px;" >
-              <a href="cart"><i class="fa fa-shopping-cart" style="font-size: 25px;"></i></a>
-            </li>
-              
+              <li>
+                <a href="logout"><i class="fa fa-sign-out"></i></a>
+              </li>
+              <li>
+                <a href="#"><i class="fa fa-bars" onclick="openNav()"></i></a>
+              </li>
             </ul>
           </nav>
         </header>
-      
-          <div id="mySidenav" class="sidenav">
-            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
-              >&times;</a
-            >
-            <a href="index.html"> Home </a>
-            <a href="dashboard"> Dashboard </a>
-            <a href="product.html"> Product </a>
-            <a href="invoice.html"> Invoice </a>
-            <a href="vendor.html"> Vendor </a>
-            <a href="purchaseOrder.html"> Purchase Order </a>
-            <a href="tag">Create Tags</a>
-            <a href="vendorPage">Create Vendor</a>
-            
-            <a href="upload.html">Upload </a>
-            
-          </div>
-
-
-<div class="container" style="width: 250px;">
-<form action="/makePO3?vendor=<%= product.vendorName %>&cart=cart3" method="post">
-    <div class="row">
-        <h4>Vendor: <%= product.vendorName %></h4>
-        <div class="input-group">
-            <input type="hidden" name="vendor" value="<%= product.vendorName %>" >
-    <input type="hidden" name="cart" value="cart3">
-    <input type="hidden" name="poNumber" value="PO<%=Math.floor(Date.now())  %>">
-            <h4>ETA: </h4>
-    <input type="date" name="ETA" required>
-    <div class="input-group">
-    </div>
-    <input type="submit" style="height: 50px; width: 100px;" value="Make PO">
-</div>
-        
-    </div>
-</form>
-</div> 
-      <div style="margin-left: 250px;">
-
+        <div id="mySidenav" class="sidenav">
+          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
+            >&times;</a
+          >
+          <a href="index.html"> Home </a>
+          <a href="dashboard"> Dashboard </a>
+          <a href="product.html"> Product </a>
+          <a href="invoice.html"> Invoice </a>
+          <a href="vendor.html"> Vendor </a>
+          <a href="purchaseOrder.html"> Purchase Order </a>
+          <a href="tag">Create Tags</a>
+          <a href="vendorPage">Create Vendor</a>
+  
+          <a href="upload.html">Upload </a>
+        </div>
+<main>
+    <div class="container" >
+        <form action="/makePO3?vendor=<%= data[0].vendorName %>&cart=cart3" method="post">
+            <div class="row">
+                <h2>Vendor: <%= data[0].vendorName %></h2>
+                <h2 id="msgP"> </h2>
+                <h2 id="msgQ"> </h2>
+                <h2 id="msgT"> </h2>
+            </div>
+            <div class="row">
+                <div class="input-group">
+                    <input type="hidden" name="vendor" value="<%= data[0].vendorName %>" >
+                    <input type="hidden" name="cart" value="cart3">
+                    <input type="hidden" name="poNumber" value="PO<%=Math.floor(Date.now())%>">
+                    <h2>ETA: </h2>
+                    <input type="date" name="ETA" required>
+                    <div class="input-group">
+                    </div>
+                    <input type="submit" style="height: 50px; width: 100px;" value="Make PO">
+                </div>
+            </div>
+        </form>
+        </div> 
     <% for(product of data){ %>
-        <div class="product" style="height: 700px;">
+        <div class="product">
+            <div class="top">
             <div class="vital">
-                
             <img src="<%= product.image_url %>" alt="productImage"><br>
-            
-                <p>Vendor: <%= product.vendorName %> </p><br>
-                <p>Model No: <%= product.modelNO%></p><br>
-                <p>Title: <%= product.title %> </p><br>
-                <p class="product_id">ID: <%= product.id %> </p><br>
-                <p>Package No: <%= product.packageNo %> </p><br>
-                <p>Vendor Price: $<%= product.vendorPrice %> </p><br>
-                <p>Actual Cost: $<%= Math.round(product.totalPurchaseAmount / product.totalPurchaseUnits)%> </p><br>
-                <p id="<%=product.id%>Breakeven">Breakeven Price: $<%= Math.round(product.totalPurchaseAmount / product.totalPurchaseUnits)  +  product.packageCost%> </p><br>
+                <p>Vendor: <%= product.vendorName %> </p>
+                <p>Model No: <%= product.modelNO%></p>
+                <p>Title: <%= product.title %> </p>
+                <p class="product_id">ID: <%= product.id %> </p>
+                <p>Package No: <%= product.packageNo %> </p>
+                <p>Vendor Price: $<%= product.vendorPrice %> </p>
+                <p>Actual Cost: $<%= Math.round(product.totalPurchaseAmount / product.totalPurchaseUnits)%> </p>
+                <p id="<%=product.id%>Breakeven">Breakeven Price: $<%= Math.round(product.totalPurchaseAmount / product.totalPurchaseUnits)  +  product.packageCost%> </p>
                 
                 
-                <button onclick="edit(this)" value="<%= product.id %>" >Edit Product Info</button><br>
+                <button onclick="edit(this)" value="<%= product.id %>" >Edit Product Info</button>
             </div>
             
             <div class="detail">
-                <p>Inventory: <%= product.inventory %> </p>
-                <button onclick="get(this)" style="border:0;background-color: #4980DE; color: white; height: 25px; border-radius: 5px;" value="<%= product.id %>" id="getBtn<%= product.id %>">Incoming <%= product.incoming %> </button>
-                <button onclick="show(this)" style="border:0;background-color: #4980DE; color: white; height: 25px; border-radius: 5px;" value="<%= product.id %>" id="showBtn<%= product.id %>" hidden> Incoming <%= product.incoming %></button>
-                <br>
+                <div class="inventory">
+                <p>Inventory: <%= product.inventory %></p>
+                <button onclick="get(this)" value="<%= product.id %>" id="getBtn<%= product.id %> " >Incoming <%= product.incoming %></button>
+                <button onclick="show(this)"  value="<%= product.id %>" id="showBtn<%= product.id %>" hidden> Incoming <%= product.incoming %></button>
+                </div>
+                <div class="price">
                 <form style="display: inline-table" onsubmit="return false">
                     <input type="hidden" name="product_id" value="<%= product.id %>">
                     <label for="sellPrice">Price: </label>
-                    <input type="number" style="width: 60px" name="sellPrice" value="<%= product.sellPrice %>" >
+                    <input type="number"  name="sellPrice" value="<%= product.sellPrice %>" >
                     <button type="button" onclick="setPrice(this)"> Set </button> 
-                </form><br>
-                <p class="hovertext" data-hover="Profit">($<%= (product.sellPrice) - Math.round((product.totalPurchaseAmount / product.totalPurchaseUnits)  +  product.packageCost ) %>|</p>
-                <p class="hovertext" data-hover="Margin"><%= Math.round((product.sellPrice - (product.totalPurchaseAmount / product.totalPurchaseUnits)  -  product.packageCost) / product.sellPrice * 100) %>%|</p>
-                <p class="hovertext" data-hover="ROI"> <%= Math.round((product.sellPrice - (product.totalPurchaseAmount / product.totalPurchaseUnits)  -  product.packageCost) / ((product.totalPurchaseAmount / product.totalPurchaseUnits)  +  product.packageCost) * 100) %>%)</p><br>
+                </form>
+                <p class="hovertext" data-hover="Profit">($<%= (product.sellPrice) - Math.round((product.totalPurchaseAmount / product.totalPurchaseUnits)  +  product.packageCost ) %> /</p>
+                <p class="hovertext" data-hover="Margin"><%= Math.round((product.sellPrice - (product.totalPurchaseAmount / product.totalPurchaseUnits)  -  product.packageCost) / product.sellPrice * 100) %> /</p>
+                <p class="hovertext" data-hover="ROI"> <%= Math.round((product.sellPrice - (product.totalPurchaseAmount / product.totalPurchaseUnits)  -  product.packageCost) / ((product.totalPurchaseAmount / product.totalPurchaseUnits)  +  product.packageCost) * 100) %>%)</p>
+            </div>
+            <div class="historyPurchase">
                 <p>Total Purchase: <%= product.totalPurchaseUnits %>
-                    <span class="hovertext" data-hover="Purchase Amount">($<%= product.totalPurchaseAmount %>)</span>
-                </p><br>
-                <p>Total Sold: <%= product.totalSoldUnits %> </p><br>
-                <p>TTM GMS: $<%= product.GMS %></p><br>
+                    <p class="hovertext" data-hover="Purchase Amount">($<%= product.totalPurchaseAmount %>)</p>
+                </p>
+            </div>
+                <p>Total Sold Units: <%= product.totalSoldUnits %> </p>
+                <div class="historySales">
+                <p>TTM GMS: $<%= product.GMS %></p>
 
-                    <p class="hovertext" data-hover="AVG Sold Price">($<%= Math.round(product.avgPrice) %>|</p> 
-                    <p class="hovertext" data-hover="Margin"><%= Math.round((product.avgPrice - (product.totalPurchaseAmount / product.totalPurchaseUnits)  -  product.packageCost) / product.avgPrice * 100) %>%|</p> 
+                    <p class="hovertext" data-hover="AVG Sold Price">($<%= Math.round(product.avgPrice) %> /</p> 
+                    <p class="hovertext" data-hover="Margin"><%= Math.round((product.avgPrice - (product.totalPurchaseAmount / product.totalPurchaseUnits)  -  product.packageCost) / product.avgPrice * 100) %>% /</p> 
                     <p class="hovertext" data-hover="ROI"><%= Math.round((product.avgPrice - (product.totalPurchaseAmount / product.totalPurchaseUnits)  -  product.packageCost) / ((product.totalPurchaseAmount / product.totalPurchaseUnits)  +  product.packageCost) * 100) %>%)</p>
-                
-                <p>Life Time Profit : $<%= (product.GMS)-(product.totalPurchaseAmount) %> </p><br>
-
-            <div class="cart">
-                <p>Cart1: <p id="<%= product.id %>cart1"><%= product.cart1 %></p> Units </p><br>
-                <p>Cart2: <p id="<%= product.id %>cart2"><%= product.cart2 %></p> Units </p><br>
-                <p>Cart3: <p id="<%= product.id %>cart3"><%= product.cart3 %></p> Units </p><br>
-                <form style="display: inline-table" onsubmit="return false">
-                    <input class="id" type="hidden" name="id" value="<%= product.id%>">
-                    <input type="hidden" name="cart" value="cart1">
-                    <input class="quantity" type="number" id="quantity" name="quantity" style="width: 60px">
-                    <button class="button" type="button" value="Add" onclick="add(this)" style="margin-left: 5px;"> Add To Cart 1</button>
-                </form><br>
-                <form style="display: inline-table" onsubmit="return false">
-                    <input class="id" type="hidden" name="id" value="<%= product.id%>">
-                    <input type="hidden" name="cart" value="cart2">
-                    <input class="quantity" type="number" id="quantity2" name="quantity" style="width: 60px">
-                    <button class="button" type="button" value="Add" onclick="add(this)" style="margin-left: 5px;"> Add To Cart 2</button>
-                </form><br>
-                <form style="display: inline-table" onsubmit="return false">
-                    <input class="id" type="hidden" name="id" value="<%= product.id%>">
-                    <input type="hidden" name="cart" value="cart3">
-                    <input class="quantity" type="number" id="quantity3" name="quantity" style="width: 60px">
-                    <button class="button" type="button" value="Add" onclick="add(this)" style="margin-left: 5px;"> Add To Cart 3</button><br>
-                </form><br>
-                <button class="chartBtn" type="button" value="<%= product.id %>" onclick="chart(this)" style="display: none;"> This Year Sales Performance</button><br>
+                </div>
+                <p>Life Time Profit : $<%= (product.GMS)-(product.totalPurchaseAmount) %> </p>
 
                 
-            </div> 
+                <button class="chartBtn" type="button" value="<%= product.id %>" onclick="chart(this)" style="display: none;"> This Year Sales Performance</button>
+                <div class="cart">
+                    <div class="cartInfo">
+                        <div class="cart1">
+                            <p>Cart1: <p id="<%= product.id %>cart1"><%= product.cart1 %></p> Units </p>
+                            <form style="display: inline-table" onsubmit="return false">
+                                <input class="id" type="hidden" name="id" value="<%= product.id%>">
+                                <input type="hidden" name="cart" value="cart1">
+                                <input class="quantity" type="number" id="quantity" name="quantity" >
+                                <button class="button fa fa-cart-plus" type="button" value="Add" onclick="add(this)" ></button>
+                            </form>
+                        </div>
+                        <div class="cart2">
+                            <p>Cart2: <p id="<%= product.id %>cart2"><%= product.cart2 %></p> Units </p>
+                            <form style="display: inline-table" onsubmit="return false">
+                                <input class="id" type="hidden" name="id" value="<%= product.id%>">
+                                <input type="hidden" name="cart" value="cart2">
+                                <input class="quantity" type="number" id="quantity2" name="quantity" >
+                                <button class="button fa fa-cart-plus" type="button" value="Add" onclick="add(this)" ></button>
+                            </form>
+                        </div>
+                        <div class="cart3">
+                            <p>Cart3: <p id="<%= product.id %>cart3"><%= product.cart3 %></p> Units </p>
+                            <form style="display: inline-table" onsubmit="return false">
+                                <input class="id" type="hidden" name="id" value="<%= product.id%>">
+                                <input type="hidden" name="cart" value="cart3">
+                                <input class="quantity" type="number" id="quantity3" name="quantity" >
+                                <button class="button fa fa-cart-plus" type="button" value="Add" onclick="add(this)" ></button><br>
+                            </form>
+                        </div>
+                    </div>
+                    
+                </div>
+                
             
             </div>
             
-            <div class="chart">
-                <canvas class="salesChart" id="<%= product.id %>thisYear" style="max-width: 100%; max-height: 400px; height: 400px; margin-right: 10px; float: left;"></canvas>
+
+            <canvas class="salesChart" id="<%= product.id %>thisYear" ></canvas>
+            <div class="shoppingCart">
+                <div class="cartDetail">
+                    <p>Quantity</p>
+                    <p class="q"><%= product.cart3 %></p>
+                </div>
+                <div class="cartDetail">
+                    <p>Price</p>
+                    <p class="p"><%= product.vendorPrice %></p>
+                </div>
+                <div class="cartDetail">
+                    <p>Total</p>
+                    <p class="t"><%= Number(product.cart3) * Number(product.vendorPrice) %></p>
+                </div>
+            </div>
             </div>
             
-             <div class="tag">
-            <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag1<%= product.id%>"><%=product.tag1%></button>
-            <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag2<%= product.id
-             %>"><%=product.tag2%></button>
-            <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag3<%= product.id
-             %>"><%=product.tag3%></button>
-            <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag4<%= product.id
-             %>"><%=product.tag4%></button>
-            <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag5<%= product.id
-             %>"><%=product.tag5%></button>
-             <p id="tagMsg<%= product.id %>" style="display: none; color: red;">Maximum Count is 5, Please Remove Unwanted Tags Before Adding New Tag</p>
-
-        </div>
-
             
+            <div class="tag">
+                <div class="tagBtn">
+                    <label for="tagOptions" >Add Prodcut Tag:</label>
+                    <select name="tagOptions" id="tagOptions<%= product.id %>" class="tagOptions" >
+                    </select>
+                    <button value="<%= product.id %>" onclick="addTag(this)" class="createBtn"> Add</button>
+                    <p id="tagMsg<%= product.id %>" style="display: none; color: red;">Over Limit</p>
+                 </div>
+                <div class="tagDetail">
+                    <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag1<%= product.id%>"><%=product.tag1%></button>
+                    <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag2<%= product.id
+                    %>"><%=product.tag2%></button>
+                    <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag3<%= product.id
+                    %>"><%=product.tag3%></button>
+                    <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag4<%= product.id
+                    %>"><%=product.tag4%></button>
+                    <button onclick="removeTag(this)" class="tag<%= product.id %>" id="tag5<%= product.id
+                    %>"><%=product.tag5%></button>
+                </div>
+           
+            </div>
 
             
             <div class="remark">
-                <label for="tagOptions" style="margin-left: 5px;">Add Prodcut Tag:</label>
-            <select name="tagOptions" id="tagOptions<%= product.id %>" class="tagOptions" style="width: 100px;">
-            </select>
-            <button value="<%= product.id %>" onclick="addTag(this)" class="createBtn"> Add</button><br>
                 <form onsubmit="return false">
-                    <label for="remark"> Remark:</label>
-                    <input type="text" name="remark" style="width: 70%; margin-left: 10px;" value="<%= product.remark %>">
-                    <button type="button" onclick="mark(this)" value="<%= product.id %>"> Save</button>
+                    <div class="label">
+                        <label for="remark"> Remark:</label>
+                        <input type="text" name="remark" value="<%= product.remark %>">
+                    </div>
+                    <div>
+                        <button type="button" onclick="mark(this)" value="<%= product.id %>"> Save</button>
+                    </div>
                 </form>
             </div> 
         </div>
@@ -213,16 +250,16 @@
         </div>
 
         <!-- The Update Modal -->
-        <div id="update<%= product.id %>" class="modal" >
+        <div id="update<%= product.id %>" class="modal">
             <!-- Modal content -->
             <div class="modal-content" style="width: 17%;">
                 <span class="close" id="close2<%= product.id%>">&times;</span>
                 <form>
-                    <label for="vendorPrice"> Vendor Price </label>
+                    <label for="vendorPrice"> Vendor Price </label><br>
                     <input type="number" name="vendorPrice" value="<%= product.vendorPrice %>"><br>
-                    <label for="packageNo">Package Number </label>
+                    <label for="packageNo">Package Number </label><br>
                     <input type="text" name="packageNo" value="<%= product.packageNo %>"><br>
-                    <label for="packageCost">Package Cost</label>
+                    <label for="packageCost">Package Cost</label><br>
                     <input type="number" name="packageCost" value="<%= product.packageCost %>"><br>
                     <button type="button" value="<%= product.id %>" onclick="change(this)"> Change</button>
                 </form>
@@ -234,9 +271,11 @@
 
 
    <% } %> 
-
+</main>
    </div>
-  <script src="/script/navBar.js"></script>
-  <script src="/script/product.js"></script>
+   
+    <script src="/script/navBar.js"></script>
+   <script src="/script/product.js"></script>
+   <script src="/script/shoppingCart.js"></script>
 </body>
 </html>

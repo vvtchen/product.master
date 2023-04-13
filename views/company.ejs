@@ -1,121 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <!DOCTYPE html>
-<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>index</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="table.css">
-    <link rel="stylesheet" href="account.css">
+    <title>Document</title>
   </head>
   <body>
-    
-  
-<header class="header">
-    <nav>
-        <ul>
-            <li style="width: 2%" >
-                <span style="cursor: pointer; font-size: 26px;" onclick="openNav()"> &#9776</span>
-              </li>
-          <li style=" margin:0 auto; width: 85%;">
-            
-            <form action="/search" style="margin: 0 auto;" class="search">
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>index</title>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
+          rel="stylesheet"
+        />
+        <link rel="stylesheet" href="navBar.css" />
+
+        <link rel="stylesheet" href="table.css" />
+        <link rel="stylesheet" href="account.css" />
+      </head>
+      <body>
+        <div class="wrapper">
+          <header>
+            <a href="/index.html">Easy Product</a>
+            <form action="/search" class="search">
               <input
                 type="search"
                 class="searchBar"
                 name="product"
-                width="100%"
                 placeholder="Search... "
               />
-
             </form>
-          </li>
-          <li style="width: 2%; float: right; margin-right: 15px;">
-            <a href="logout"><i class="fa fa-sign-out" style="font-size: 25px;"></i></a>
-          </li>
-          <li style="width: 2%; float: right; margin-right: 15px;" >
-          <a href="account"><i class="fa fa-user" style="font-size: 25px;"></i></a>
-        </li>
-          <li style="width: 2%; float: right; margin-right: 15px;" >
-            <a href="cart"><i class="fa fa-shopping-cart" style="font-size: 25px;"></i></a>
-          </li>
-          
-        </ul>
-      </nav>
-    </header>
-  
-      <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
-          >&times;</a
-        >
-        <a href="index.html"> Home </a>
-        <a href="dashboard"> Dashboard </a>
-        <a href="product.html"> Product </a>
-        <a href="invoice.html"> Invoice </a>
-        <a href="vendor.html"> Vendor </a>
-        <a href="purchaseOrder.html"> Purchase Order </a>
-        <a href="tag">Create Tags</a>
-        <a href="vendorPage">Create Vendor</a>
-        
-        <a href="upload.html">Upload </a>
-        
-      </div>
-    </body>
-    <script src="/script/navBar.js"></script>
-</html>
-<h1>Account Info</h1>
-<div class="table-wrapper" style="width: 40%;">
-<table class="fl-table">
-  <tr>
-    <th>User</th>
-    <th>Email</th>
-    <th>Company</th>
-  </tr>
-  <tr>
-    <td id="user"><%= user.name %></td>
-    <td id="emailAccount"><%= user.email %></td>
-    <td id="company"><%= user.company %></td>
-  </tr>
-</table>
-</div>
-<h1>Mamber List of <%= users[0].company%></h1>
-<div class="table-wrapper" style="width: 40%;">
-  
-    <table class="fl-table" id="table">
-        <tr>
-            <th>User Name</th>
-            <th>Email</th>
-            <th>Role</th>
-          </tr>
-        <% for( user of users ) { %>
-            <tr>
-                <td><%= user.name %></td>
-                <td><%= user.email %></td>
-                <td><%= user.permission %></td>
-              </tr>
-        <% } %>
-          
-        
-    </table>
-</div>
+            <nav>
+              <ul>
+                <li>
+                  <a href="cart"><i class="fa fa-shopping-cart"></i></a>
+                </li>
+                <li>
+                  <a href="account"><i class="fa fa-user"></i></a>
+                </li>
+                <li>
+                  <a href="logout"><i class="fa fa-sign-out"></i></a>
+                </li>
+                <li>
+                  <a href="#"><i class="fa fa-bars" onclick="openNav()"></i></a>
+                </li>
+              </ul>
+            </nav>
+          </header>
+          <div id="mySidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
+              >&times;</a
+            >
+            <a href="index.html"> Home </a>
+            <a href="dashboard"> Dashboard </a>
+            <a href="product.html"> Product </a>
+            <a href="invoice.html"> Invoice </a>
+            <a href="vendor.html"> Vendor </a>
+            <a href="purchaseOrder.html"> Purchase Order </a>
+            <a href="tag">Create Tags</a>
+            <a href="vendorPage">Create Vendor</a>
 
-<h1 style="margin-bottom: 30px;">Invite New User</h1>
-    <input type="email" id="email" placeholder="example@gmail.com" autocomplete="off" required="required" style="height:35px; width: 35%; border-color: #2564cf; border-style: solid; border-radius: 10px; margin-left:70px; padding-left:10px; color: #2564cf"/>
-    <button type="submit" onclick="add()" style="height:35px; width: 70px; background-color: #2564cf; border: 0; border-radius: 10px;"><span style="color: #ffffff; font-weight: bold;">Invite</span></button>
-        <small id="msg" style="color: red;"></small>
+            <a href="upload.html">Upload </a>
+          </div>
 
-<script src="/script/company.js"></script>
+          <script src="/script/navBar.js"></script>
+          <main>
+            <h1>Account Info</h1>
+            <div class="table-wrapper">
+              <table class="fl-table">
+                <tr>
+                  <td>User</td>
+                  <td>Email</td>
+                  <td>Company</td>
+                </tr>
+                <tr>
+                  <td id="user"><%= user.name %></td>
+                  <td id="emailAccount"><%= user.email %></td>
+                  <td id="company"><%= user.company %></td>
+                </tr>
+              </table>
+            </div>
+            <h1>Mamber List of <%= users[0].company%></h1>
+            <div class="table-wrapper">
+              <table class="fl-table" id="table">
+                <tr>
+                  <td>User Name</td>
+                  <td>Email</td>
+                  <td>Role</td>
+                </tr>
+                <% for( user of users ) { %>
+                <tr>
+                  <td><%= user.name %></td>
+                  <td><%= user.email %></td>
+                  <td><%= user.permission %></td>
+                </tr>
+                <% } %>
+              </table>
+            </div>
 
-</body>
+            <h1>Invite New User</h1>
+            <div class="inputSession">
+              <input
+                type="email"
+                id="email"
+                placeholder="example@gmail.com"
+                autocomplete="off"
+                required="required"
+              />
+              <button type="submit" onclick="add()">
+                <span>Invite</span>
+              </button>
+              <small id="msg"></small>
+            </div>
+
+            <script src="/script/company.js"></script>
+          </main>
+        </div>
+      </body>
+    </html>
+  </body>
 </html>

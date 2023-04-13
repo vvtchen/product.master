@@ -37,7 +37,7 @@ async function create(ele) {
     const contactData = row.insertCell(1);
     contactData.textContent = contact;
     const contactEmailData = row.insertCell(2);
-    contactData.textContent = contactEmail;
+    contactEmailData.textContent = contactEmail;
     const addressData = row.insertCell(3);
     addressData.textContent = address;
   }

@@ -4,46 +4,54 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="table.css">
-    <link rel="stylesheet" href="detail.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="navBar.css" />
+    <link rel="stylesheet" href="table.css" />
+    <link rel="stylesheet" href="detail.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
     <title>PurchaseOrder</title>
   </head>
   <body>
-    <header class="header">
-      <nav>
-        <ul>
-            <li style="width: 5%; margin-top: px;" >
-                <span style="cursor: pointer; font-size: 26px;" onclick="openNav()"> &#9776</span>
-              </li>
-          <li style=" margin:0px auto; width: 85%;">
-            
-            <form action="/search" style="margin: 0 auto;">
-              <input
-                type="search"
-                class="searchBar"
-                name="product";
-                width="100%"
-              />
-              <select name="searchBy" class="searchBar">
-                <option value="title" class="searchBar">Product Title</option>
-                <option value="id" class="searchBar">Product ID</option>
-              </select>
-
-            </form>
-          </li>
-          <li style="width: 3%; float: right; margin-right: 15px;">
-            <a href="logout"><i class="fa fa-sign-out" style="font-size: 25px;"></i></a>
-          </li>
-          <li style="width: 3%; float: right; margin-right: 15px;" >
-          <a href="cart"><i class="fa fa-shopping-cart" style="font-size: 25px;"></i></a>
-        </li>
-          
-        </ul>
-      </nav>
-    </header>
-  
+    <div class="wrapper">
+      <header>
+        <a href="/index.html">Easy Product</a>
+        <form action="/search" class="search">
+          <input
+            type="search"
+            class="searchBar"
+            name="product"
+            placeholder="Search... "
+          />
+        </form>
+        <nav>
+          <ul>
+            <li>
+              <a href="cart"><i class="fa fa-shopping-cart"></i></a>
+            </li>
+            <li>
+              <a href="account"><i class="fa fa-user"></i></a>
+            </li>
+            <li>
+              <a href="logout"><i class="fa fa-sign-out"></i></a>
+            </li>
+            <li>
+              <a href="#"><i class="fa fa-bars" onclick="openNav()"></i></a>
+            </li>
+          </ul>
+        </nav>
+      </header>
       <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
           >&times;</a
@@ -56,54 +64,53 @@
         <a href="purchaseOrder.html"> Purchase Order </a>
         <a href="tag">Create Tags</a>
         <a href="vendorPage">Create Vendor</a>
-        
+
         <a href="upload.html">Upload </a>
-        
       </div>
 
-        
-<div class="container" style="display: block; width: 300px;">
-  <div class="row">
-  <h3>PO Number:</h3>
-    <h4> <%= result[0].id %></h4>
-    <h3>Invoice ID:</h3>
-    <h4> <%= result[0].invoiceID %></h4>
-  </div>
-  <div class="row">
-    <h3>Detail:</h3>
-    <h4>Status: <small> <%= result[0].status %></small></h4>
-    
-    <h4>Vendor:<small> <%= result[0].vendorName %></small></h4>
-    <h4>ETA: <small> <%= result[0].ETA %></small></h4>
-    <h4>SKU: <small id="sku"></small></h4>
-    <h4>Quantity: <small id="quantity"></small></h4>
-    <h4>Amount: <small id="amount"></small></h4>
-  </div>
-</div>
-  <div class="table-wrapper" style="margin-left: 360px; margin-top: 50px; position: fixed; max-width: 70%; width: 70%; overflow: scroll; max-height: 90%;">
-    <table id="customers" class="fl-table">
-      <tr>
-        <th>Product ID</th>
-        <th>Model No</th>
-        <th>Quantity</th>
-        <th>Vendor Price</th>
-        <th>ETA</th>
-        <th>Status</th>
-      </tr>
-      <% for (info of result){ %>
-      <tr class="rowData">
-        <td><%= info.product_id %></td>
-        <td><%= info.modelNO %></td>
-        <td class="quantity"><%= info.quantity %></td>
-        <td class="price"><%= info.vendorPrice %></td>
-        <td><%= info.ETA %></td>
-        <td><%= info.status %></td>
-      </tr>
-      <% } %>
-    </table>
-
-  </div>
-
+      <main>
+        <div class="container">
+          <div class="row">
+            <h2>PO Number:</h2>
+            <h3><%= result[0].id %></h3>
+            <h2>Invoice ID:</h2>
+            <h3><%= result[0].invoiceID %></h3>
+          </div>
+          <div class="row">
+            <h2>Status: <small> <%= result[0].status %></small></h2>
+            <h2>Vendor:<small> <%= result[0].vendorName %></small></h2>
+            <h2>ETA: <small> <%= result[0].ETA %></small></h2>
+          </div>
+          <div class="row">
+            <h2>SKU: <small id="sku"></small></h2>
+            <h2>Quantity: <small id="quantity"></small></h2>
+            <h2>Amount: <small id="amount"></small></h2>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table id="customers" class="fl-table">
+            <tr>
+              <th>Product ID</th>
+              <th>Model No</th>
+              <th>Quantity</th>
+              <th>Vendor Price</th>
+              <th>ETA</th>
+              <th>Status</th>
+            </tr>
+            <% for (info of result){ %>
+            <tr class="rowData">
+              <td><%= info.product_id %></td>
+              <td><%= info.modelNO %></td>
+              <td class="quantity"><%= info.quantity %></td>
+              <td class="price"><%= info.vendorPrice %></td>
+              <td><%= info.ETA %></td>
+              <td><%= info.status %></td>
+            </tr>
+            <% } %>
+          </table>
+        </div>
+      </main>
+    </div>
   </body>
   <script src="/script/navBar.js"></script>
   <script src="/script/poEjs.js"></script>

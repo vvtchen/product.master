@@ -166,9 +166,9 @@ h4 {
   transition: all 0.35s ease-in-out;
 }
 .container {
-  max-width: 38em;
+  max-width: 60em;
   padding: 1em 3em 2em 3em;
-  margin: 5em auto;
+  margin: 6em auto;
   background-color: #fff;
   border-radius: 4.2px;
   box-shadow: 0px 3px 10px -2px rgba(0, 0, 0, 0.2);
@@ -205,4 +205,36 @@ h4 {
     width: 100%;
     padding-right: 0;
   }
+}
+.select {
+  display: flex;
+  gap: 1.2em;
+  align-items: center;
+}
+
+.row button {
+  width: 10em;
+  height: 2em;
+  background-color: #2564cf;
+  color: white;
+  border: none;
+}
+
+.upload {
+  margin-top: 2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.upload p {
+  margin: 0;
+  color: red;
+}
+
+.action {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 1.2em;
 }

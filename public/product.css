@@ -1,0 +1,140 @@
+.hovertext {
+  position: relative;
+}
+
+.hovertext:before {
+  content: attr(data-hover);
+  visibility: hidden;
+  opacity: 0;
+  width: max-content;
+  height: 20px;
+  color: #ffffff;
+  text-align: center;
+  background-color: #2564cf;
+  padding: 3px;
+  border-radius: 4px;
+
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: 100%;
+}
+
+.hovertext:hover:before {
+  opacity: 1;
+  visibility: visible;
+}
+
+main {
+  max-width: fit-content;
+}
+
+.product {
+  margin-bottom: 5em;
+  padding: 2em;
+  box-shadow: 0px 3px 10px -2px rgba(0, 0, 0, 0.2);
+}
+.product p {
+  margin: 0.5em 0;
+}
+
+.top {
+  display: flex;
+  justify-content: start;
+  gap: 4.1em;
+  margin-bottom: 2em;
+}
+
+.salesChart {
+  max-width: 40em;
+}
+.inventory,
+.price,
+.historyPurchase,
+.historySales,
+.cartDetail {
+  display: flex;
+  justify-content: start;
+  gap: 0.5em;
+  align-items: center;
+  margin: 0;
+}
+
+.inventory button {
+  border: none;
+  background-color: #2564cf;
+  color: #ffffff;
+  border-radius: 1em;
+  padding: 0.3em;
+}
+
+.cart1,
+.cart2,
+.cart3 {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  align-items: center;
+}
+
+.top input {
+  width: 5em;
+}
+
+.cartInfo form {
+  margin: 0;
+}
+
+.cartInfo button {
+  border: none;
+  align-items: center;
+  background-color: transparent;
+  font-size: 2.2rem;
+  color: #2564cf;
+}
+.tag {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  align-items: center;
+  max-width: inherit;
+  margin-bottom: 2em;
+}
+
+.tagDetail button {
+  border: none;
+  color: #ffffff;
+  background-color: #2564cf;
+  height: 2.4em;
+  border-radius: 1em;
+}
+
+.remark form {
+  display: flex;
+  justify-content: start;
+  gap: 1em;
+  align-items: center;
+  max-width: inherit;
+}
+
+.remark {
+  margin-bottom: 2em;
+  max-width: inherit;
+}
+
+.remark input {
+  width: 60em;
+  height: 2em;
+}
+
+.remark button {
+  height: 2.5em;
+}
+
+.label {
+  display: flex;
+  justify-content: start;
+  gap: 1em;
+  align-items: center;
+  max-width: inherit;
+}

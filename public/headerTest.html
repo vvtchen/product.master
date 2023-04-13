@@ -4,34 +4,37 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="navBar.css" />
-    <link rel="stylesheet" href="filter.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
       rel="stylesheet"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <title>vendor</title>
+    <link rel="stylesheet" href="navBar.css" />
+    <script src="/script/navBar.js"></script>
+    <title>Header</title>
   </head>
   <body>
     <div class="wrapper">
       <header>
         <a href="/index.html">Easy Product</a>
-        <form action="/search" class="search">
-          <input
-            type="search"
-            class="searchBar"
-            name="product"
-            placeholder="Search... "
-          />
-        </form>
+
         <nav>
           <ul>
+            <li>
+              <form action="/search" class="search">
+                <input
+                  type="search"
+                  class="searchBar"
+                  name="product"
+                  placeholder="Search... "
+                />
+              </form>
+            </li>
             <li>
               <a href="cart"><i class="fa fa-shopping-cart"></i></a>
             </li>
@@ -62,27 +65,6 @@
 
         <a href="upload.html">Upload </a>
       </div>
-      <main>
-        <div class="container">
-          <form action="/vendorDashboard">
-            <div class="row">
-              <h2>Select Vendor</h2>
-              <select name="vendor" id="vendor"></select>
-            </div>
-            <input
-              type="submit"
-              value="Find"
-              style="
-                background-color: #2564cf;
-                color: #ffffff;
-                margin-top: 1.2em;
-              "
-            />
-          </form>
-        </div>
-      </main>
     </div>
   </body>
-  <script src="/script/vendorHtml.js"></script>
-  <script src="/script/navBar.js"></script>
 </html>

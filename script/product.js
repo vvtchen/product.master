@@ -255,7 +255,6 @@ async function mark(ele) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  ele.style = "background-color: #4980DE;";
 }
 
 async function show(ele) {

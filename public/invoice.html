@@ -4,45 +4,49 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="filter.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="navBar.css" />
+    <link rel="stylesheet" href="filter.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
     <title>invoice</title>
   </head>
   <body>
-    <header class="header">
-      <nav>
-        <ul>
-            <li style="width: 5%; margin-top: px;" >
-                <span style="cursor: pointer; font-size: 26px;" onclick="openNav()"> &#9776</span>
-              </li>
-          <li style=" margin:0px auto; width: 85%;">
-            
-            <form action="/search" style="margin: 0 auto;">
-              <input
-                type="search"
-                class="searchBar"
-                name="product";
-                width="100%"
-              />
-              <select name="searchBy" class="searchBar">
-                <option value="title" class="searchBar">Product Title</option>
-                <option value="id" class="searchBar">Product ID</option>
-              </select>
-
-            </form>
-          </li>
-          <li style="width: 3%; float: right; margin-right: 15px;">
-            <a href="logout"><i class="fa fa-sign-out" style="font-size: 25px;"></i></a>
-          </li>
-          <li style="width: 3%; float: right; margin-right: 15px;" >
-          <a href="cart"><i class="fa fa-shopping-cart" style="font-size: 25px;"></i></a>
-        </li>
-          
-        </ul>
-      </nav>
-    </header>
-  
+    <div class="wrapper">
+      <header>
+        <a href="/index.html">Easy Product</a>
+        <form action="/search" class="search">
+          <input
+            type="search"
+            class="searchBar"
+            name="product"
+            placeholder="Search... "
+          />
+        </form>
+        <nav>
+          <ul>
+            <li>
+              <a href="cart"><i class="fa fa-shopping-cart"></i></a>
+            </li>
+            <li>
+              <a href="account"><i class="fa fa-user"></i></a>
+            </li>
+            <li>
+              <a href="logout"><i class="fa fa-sign-out"></i></a>
+            </li>
+            <li>
+              <a href="#"><i class="fa fa-bars" onclick="openNav()"></i></a>
+            </li>
+          </ul>
+        </nav>
+      </header>
       <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
           >&times;</a
@@ -55,44 +59,61 @@
         <a href="purchaseOrder.html"> Purchase Order </a>
         <a href="tag">Create Tags</a>
         <a href="vendorPage">Create Vendor</a>
-        
-        <a href="upload.html">Upload </a>
-        
-      </div>
 
-<div class="container">
-<form id="form">
-  <div class="row">
-      <h4>1. Search By Invoice Number</h4>
-      <input type="text" name="id" id="invoiceID" placeholder="Invoice Number"/>
-      <input type="submit" value="Search" style="background-color: #2564cf; color: white; margin-top: 20px;"/>
-    
-    <p id="msg" style="color: red; display: none">
-      Invoice Number doesn't exist!
-    </p>
-  </div>
-</form>
-<form action="invoice" method="get">
-  <div class="row">
-    <h4>2. Filter</h4>
-    <div class="input-group">
-    <div class="input-group input-group-icon">
-      <select name="vendorName" id="Vendor">
-        <option value="all">All Vendor</option>
-      </select>
+        <a href="upload.html">Upload </a>
+      </div>
+      <main>
+        <div class="container">
+          <form id="form">
+            <div class="row">
+              <h2>1. Search By Invoice Number</h2>
+              <input
+                type="text"
+                name="id"
+                id="invoiceID"
+                placeholder="Invoice Number"
+              />
+              <input
+                type="submit"
+                value="Search"
+                style="
+                  background-color: #2564cf;
+                  color: white;
+                  margin-top: 20px;
+                "
+              />
+
+              <p id="msg" style="color: red; display: none">
+                Invoice Number doesn't exist!
+              </p>
+            </div>
+          </form>
+          <form action="invoice" method="get">
+            <div class="row">
+              <h2>2. Filter</h2>
+              <div class="select">
+                <select name="vendorName" id="Vendor">
+                  <option value="all">All Vendor</option>
+                </select>
+                <select name="status" id="status">
+                  <option value="unfinish">Unverified Invoice</option>
+                  <option value="finished">Verified Invoice</option>
+                </select>
+              </div>
+              <input
+                type="submit"
+                value="Search"
+                style="
+                  background-color: #2564cf;
+                  color: white;
+                  margin-top: 20px;
+                "
+              />
+            </div>
+          </form>
+        </div>
+      </main>
     </div>
-    <div class="input-group input-group-icon">
-      <select name="status" id="status">
-        <option value="unfinish">Unverified Invoice </option>
-        <option value="finished">Verified Invoice</option>
-      </select>
-    </div>
-    </div>
-      <input type="submit" value="Search" style="background-color: #2564cf; color: white; margin-top: 20px;"/>
-    </div>
-  </form>
-  
-</div>
   </body>
   <script src="/script/invoiceHtml.js"></script>
   <script src="/script/navBar.js"></script>

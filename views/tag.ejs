@@ -4,46 +4,54 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>index</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="createForm.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="table.css">
+    <title>Tag</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="navBar.css" />
+    <link rel="stylesheet" href="createForm.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="table.css" />
   </head>
   <body>
-    <header class="header">
-      <nav>
-        <ul>
-            <li style="width: 5%; margin-top: px;" >
-                <span style="cursor: pointer; font-size: 26px;" onclick="openNav()"> &#9776</span>
-              </li>
-          <li style=" margin:0px auto; width: 85%;">
-            
-            <form action="/search" style="margin: 0 auto;">
-              <input
-                type="search"
-                class="searchBar"
-                name="product";
-                width="100%"
-              />
-              <select name="searchBy" class="searchBar">
-                <option value="title" class="searchBar">Product Title</option>
-                <option value="id" class="searchBar">Product ID</option>
-              </select>
-
-            </form>
-          </li>
-          <li style="width: 3%; float: right; margin-right: 15px;">
-            <a href="logout"><i class="fa fa-sign-out" style="font-size: 25px;"></i></a>
-          </li>
-          <li style="width: 3%; float: right; margin-right: 15px;" >
-          <a href="cart"><i class="fa fa-shopping-cart" style="font-size: 25px;"></i></a>
-        </li>
-          
-        </ul>
-      </nav>
-    </header>
-  
+    <div class="wrapper">
+      <header>
+        <a href="/index.html">Easy Product</a>
+        <form action="/search" class="search">
+          <input
+            type="search"
+            class="searchBar"
+            name="product"
+            placeholder="Search... "
+          />
+        </form>
+        <nav>
+          <ul>
+            <li>
+              <a href="cart"><i class="fa fa-shopping-cart"></i></a>
+            </li>
+            <li>
+              <a href="account"><i class="fa fa-user"></i></a>
+            </li>
+            <li>
+              <a href="logout"><i class="fa fa-sign-out"></i></a>
+            </li>
+            <li>
+              <a href="#"><i class="fa fa-bars" onclick="openNav()"></i></a>
+            </li>
+          </ul>
+        </nav>
+      </header>
       <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
           >&times;</a
@@ -56,54 +64,76 @@
         <a href="purchaseOrder.html"> Purchase Order </a>
         <a href="tag">Create Tags</a>
         <a href="vendorPage">Create Vendor</a>
-        
+
         <a href="upload.html">Upload </a>
-        
       </div>
       <script>
         /* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
         function openNav() {
           document.getElementById("mySidenav").style.width = "20%";
         }
-    
+
         /* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
         function closeNav() {
           document.getElementById("mySidenav").style.width = "0%";
         }
       </script>
-
-    <div class="container">
-      <form onsubmit="return false" style="display: block">
-        <div class="row">
-          <h4>Create Product Tag</h4>
-        <div class="input-group input-group-icon">
-        <input type="text" name="tag" id="tag" placeholder="Product Tag"/>
-        <div class="input-icon"><i class="fa fa-tag"></i></div>
+      <main>
+        <div class="container">
+          <form onsubmit="return false">
+            <div class="row">
+              <h4>Create Product Tag</h4>
+              <div class="input-group input-group-icon">
+                <input
+                  type="text"
+                  name="tag"
+                  id="tag"
+                  placeholder="Product Tag"
+                />
+                <div class="input-icon"><i class="fa fa-tag"></i></div>
+              </div>
+              <div class="input-group input-group-icon">
+                <input
+                  type="text"
+                  name="description"
+                  id="description"
+                  placeholder="Description"
+                />
+                <div class="input-icon"><i class="fa fa-paragraph"></i></div>
+              </div>
+              <button
+                onclick="add(this)"
+                style="
+                  background-color: #2564cf;
+                  width: 100px;
+                  height: 30px;
+                  float: right;
+                  color: white;
+                  border: none;
+                "
+              >
+                Create
+              </button>
+              <p id="msg" style="color: red"></p>
+            </div>
+          </form>
         </div>
-        <div class="input-group input-group-icon">
-        <input type="text" name="description" id="description" placeholder="Description"/>
-        <div class="input-icon"><i class="fa fa-paragraph"></i></div>
-        </div>
-        <button onclick="add(this)" style="color: #2564cf; width: 100px; height: 30px; float: right;">Create</button>
-        <p id="msg" style="color: red"></p>
-      </div>
-      </form>
-      
-    </div>
-    <div class="table-wrapper" style="margin-left: 490px; margin-top: 50px; position: fixed; max-width: 60%; width: 60%; overflow: scroll; max-height: 90%;">
-      <table class="fl-table" id="table-left">
-      <tr>
-        <th>Tag Name</th>
-        <th>Description</th>
-      </tr>
-      <% for(ele of data){%>
-      <tr>
-        <td><%= ele.tagName %></td>
-        <td><%= ele.description %></td>
-      </tr>
+        <div class="table-wrapper">
+          <table class="fl-table" id="table-left">
+            <tr>
+              <th>Tag Name</th>
+              <th>Description</th>
+            </tr>
+            <% for(ele of data){%>
+            <tr>
+              <td><%= ele.tagName %></td>
+              <td><%= ele.description %></td>
+            </tr>
 
-      <% } %>
-    </table>
+            <% } %>
+          </table>
+        </div>
+      </main>
     </div>
   </body>
   <script>
@@ -133,5 +163,4 @@
       }
     }
   </script>
-  
 </html>
