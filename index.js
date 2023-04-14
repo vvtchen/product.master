@@ -635,15 +635,15 @@ app.get("/product", (req, res, next) => {
     }
 
     if (where.length > 0) {
-      where += ` and company = '${req.cookies["company"]}'`;
+      where += ` and productInfo.company = '${req.cookies["company"]}'`;
     } else {
-      where += ` where company = '${req.cookies["company"]}'`;
+      where += ` where productInfo.company = '${req.cookies["company"]}'`;
     }
 
     let orderBy = ` order by ${req.query.orderBy}`;
     let queryString = where + orderBy;
 
-    const query = `select sales.product_id as id, productInfo.image_url, productInfo.modelNO, productInfo.title, productInfo.vendorName, productInfo.vendorPrice, productInfo.incoming, productInfo.sellPrice, productInfo.packageNo, productInfo.packageCost, productInfo.creationDate, (productInfo.GMS / productInfo.totalSoldUnits)AS avgPrice, productInfo.GMS, productInfo.totalSoldUnits, productInfo.totalPurchaseUnits, productInfo.totalPurchaseAmount,productInfo.cart1, productInfo.cart2, productInfo.cart3, (productInfo.totalPurchaseUnits - productInfo.totalSoldUnits) AS inventory, productInfo.remark, productInfo.tag1, productInfo.tag2, productInfo.tag3, productInfo.tag4, productInfo.tag5 from sales inner join productInfo on sales.product_id = productInfo.id ${queryString}`;
+    const query = `select sales.product_id as id, productInfo.image_url, productInfo.modelNO, productInfo.title, productInfo.vendorName, productInfo.vendorPrice, productInfo.incoming, productInfo.sellPrice, productInfo.packageNo, productInfo.packageCost, productInfo.creationDate, (productInfo.GMS / productInfo.totalSoldUnits)AS avgPrice, productInfo.GMS, productInfo.totalSoldUnits, productInfo.totalPurchaseUnits, productInfo.totalPurchaseAmount,productInfo.cart1, productInfo.cart2, productInfo.cart3, (productInfo.totalPurchaseUnits - productInfo.totalSoldUnits) AS inventory, productInfo.remark, productInfo.tag1, productInfo.tag2, productInfo.tag3, productInfo.tag4, productInfo.tag5, productInfo.company from sales inner join productInfo on sales.product_id = productInfo.id ${queryString}`;
     con.query(query, (err, data) => {
       if (err) throw err;
       res.render("product", { data });
