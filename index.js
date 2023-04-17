@@ -504,24 +504,49 @@ app.post("/uploadInvoice", async (req, res) => {
   const company = req.cookies["company"];
   const rows = req.body.data;
   const checkPO = await Query(
-    `select id from PO where id = '${rows[0][2]}' and vendorName = '${rows[0][0]}' and company = '${company}'`
+    `select product_id from PO where id = '${rows[0][2]}' and vendorName = '${rows[0][0]}' and company = '${company}' and status = 'not receive'`
   );
-  if (checkPO.length === 0) {
-    return res
-      .status(200)
-      .json({ error: `Can't find corresponding purchase order!` });
-  }
 
+  if (checkPO.length === 0) {
+    return res.status(200).json({
+      error: `Can't find corresponding purchase order or this invoice has already uploaded earlier!`,
+    });
+  }
+  let set = new Set();
+  for (let item of checkPO) {
+    set.add(item.product_id);
+  }
+  let errorID = [];
   for (let row of rows) {
     row.push(company);
+    if (!set.has(row[3])) {
+      errorID.push(row[3]);
+    } else {
+      set.delete(row[3]);
+    }
   }
-
+  if (errorID.length > 0) {
+    return res.json({ errorID: errorID });
+  }
+  if (set.size > 0) {
+    set.forEach((ele) => {
+      rows.push([
+        rows[0][0],
+        rows[0][1],
+        rows[0][2],
+        ele,
+        0,
+        0,
+        rows[0][6],
+        company,
+      ]);
+    });
+  }
   let query =
     "INSERT INTO invoice (vendorName, invoice_id, po_id, product_id, purchaseUnits, purchasePrice, invoice_date, company) VALUES ?";
   con.query(query, [rows], function (err, result) {
     if (err) throw err;
   });
-
   for (let i = 0; i < rows.length; i++) {
     const updateProductInfo = `UPDATE productInfo SET incoming = incoming - ${Number(
       rows[i][4]
@@ -532,7 +557,9 @@ app.post("/uploadInvoice", async (req, res) => {
     } WHERE id = '${Number(rows[i][3])}'`;
     const updatePO = `UPDATE PO SET status = 'received', invoiceID = '${
       rows[i][1]
-    }' WHERE product_id = ${Number(rows[i][3])} AND id = '${rows[i][2]}'`;
+    }' WHERE product_id = ${Number(rows[i][3])} AND id = '${
+      rows[i][2]
+    }' AND company = '${company}'`;
     con.query(updateProductInfo, (err, result) => {
       if (err) throw err;
     });
@@ -766,7 +793,7 @@ app.get("/search", (req, res) => {
   const product = req.query.product;
   const company = req.cookies["company"];
   const query = `SELECT id, image_url, modelNO, title, vendorName, vendorPrice, incoming, sellPrice, packageNo, packageCost, creationDate, (GMS / totalSoldUnits)AS avgPrice, GMS, totalSoldUnits, totalPurchaseUnits, totalPurchaseAmount,cart1, cart2, cart3, (totalPurchaseUnits - totalSoldUnits) AS inventory, remark,
-  tag1, tag2, tag3, tag4, tag5 from productInfo where (title like '%${product}%' or id like '${product}%') and company = '${company}'`;
+  tag1, tag2, tag3, tag4, tag5 from productInfo where (title like '%${product}%' or id like '${product}%' or modelNO like '${product}') and company = '${company}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     res.render("product", { data });

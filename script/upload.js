@@ -111,7 +111,7 @@ async function invoice() {
   const file = inputFile.files[0];
   if (!date || !file) {
     msg.style.color = "red";
-    return (msg.textContent = "Date and file not found");
+    return (msg.textContent = "Date and file can not be empty");
   }
   const reader = new FileReader();
   reader.onload = async function (event) {
@@ -141,6 +141,9 @@ async function invoice() {
     } else if (result.success) {
       msg.textContent = result.success;
       msg.style.color = "green";
+    } else if (result.errorID) {
+      msg.textContent = `Can't find product id ${result.errorID} in the corresponding purchase order`;
+      msg.style.color = "red";
     } else {
       msg.textContent = "Something went wrong, please check again later";
       msg.style.color = "red";
