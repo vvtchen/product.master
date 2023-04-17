@@ -793,7 +793,7 @@ app.get("/search", (req, res) => {
   const product = req.query.product;
   const company = req.cookies["company"];
   const query = `SELECT id, image_url, modelNO, title, vendorName, vendorPrice, incoming, sellPrice, packageNo, packageCost, creationDate, (GMS / totalSoldUnits)AS avgPrice, GMS, totalSoldUnits, totalPurchaseUnits, totalPurchaseAmount,cart1, cart2, cart3, (totalPurchaseUnits - totalSoldUnits) AS inventory, remark,
-  tag1, tag2, tag3, tag4, tag5 from productInfo where (title like '%${product}%' or id like '${product}%' or modelNO like '${product}') and company = '${company}'`;
+  tag1, tag2, tag3, tag4, tag5 from productInfo where (title like '%${product}%' or id like '${product}%' or modelNO like '${product}%') and company = '${company}'`;
   con.query(query, (err, data) => {
     if (err) throw err;
     res.render("product", { data });
