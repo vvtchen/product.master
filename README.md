@@ -17,12 +17,12 @@ This project has user authentication which will make business data safe, only pe
 
 ## How to use
 
-*	Register a company account then we will send you an email account verification mail. Once your account is verified you are allowed to log in to the system.
-* You can invite people to join the system, the system will send an invitation link to the user you invite to join you.
+1.	Register a company account then we will send you an email account verification mail. Once your account is verified you are allowed to log in to the system.
+2. You can invite people to join the system, the system will send an invitation link to the user you invite to join you.
 <img width="679" alt="image" src="https://user-images.githubusercontent.com/128115790/232392745-2994e9f2-7a34-4f71-b9c3-07babae5dfd1.png">
 
 
-*	In order to import data into the system, the first thing need to do is create the vendor information on the create vendor page. Once the system has the vendor info, you can use the xlsx template and import product data into the system on the upload page.
+3.	In order to import data into the system, the first thing need to do is create the vendor information on the create vendor page. Once the system has the vendor info, you can use the xlsx template and import product data into the system on the upload page.
 <img width="611" alt="image" src="https://user-images.githubusercontent.com/128115790/232392851-f6a634da-9cf5-4b15-8f4e-1564684443af.png">
 <img width="644" alt="image" src="https://user-images.githubusercontent.com/128115790/232393484-15f36404-8361-4480-b770-b02040b77e87.png">
 
@@ -30,20 +30,20 @@ This project has user authentication which will make business data safe, only pe
 
 
 
-*	In order to import invoice data, you will need to make sure you have already made a purchase order, otherwise, you will get an error message. This is to prevent unknown invoices.
-*	In order to upload sales data, you will need to use the sales template on the upload page. While importing sales, the system will find the earliest invoice that still has inventory and calculates the profit for you.
+4.	In order to import invoice data, you will need to make sure you have already made a purchase order, otherwise, you will get an error message. This is to prevent unexpect invoices.
+5.	In order to upload sales data, you will need to use the sales template on the upload page. While importing sales, the system will find the earliest invoice that still has inventory and calculates the profit for you.
 
-*	Once you import the product into the system, you can change the price, add product tags, and leave a remark comment on the product page.
+6.	Once you import the product into the system, you can change the price, add product tags, and leave a remark comment on the product page.
 <img width="678" alt="image" src="https://user-images.githubusercontent.com/128115790/232392936-685bd3ae-ade0-4816-bb1d-ec43899ee5a3.png">
 
 
-*	To make a purchase order, you can add quantity to the shopping cart from the product page and check out from the shopping cart page. Each product has 3 different shopping carts and is separated by the vendor.
+7. To make a purchase order, you can add quantity to the shopping cart from the product page and check out from the shopping cart page. Each product has 3 different shopping carts and is separated by the vendor.
 <img width="673" alt="image" src="https://user-images.githubusercontent.com/128115790/232393038-130028a4-2c82-44f2-a1b9-88a1a527ec5b.png">
 
-*	You can use the product filter function to find products that have sales between a specific date and monitor your sales, and inventory status, or update the price. 
+8. You can use the product filter function to find products that have sales between a specific date and monitor your sales, and inventory status, or update the price. 
 <img width="468" alt="image" src="https://user-images.githubusercontent.com/128115790/232388242-e76a8d65-3673-46b5-8194-cbd95787282d.png">
 
-*	On the vendor dashboard page. You can monitor each month’s sales performance and inventory level. This page is to support you in making sales goals, purchase plans, and finding an opportunity to grow product sales from this vendor.
+9.	On the vendor dashboard page. You can monitor each month’s sales performance and inventory level. This page is to support you in making sales goals, purchase plans, and finding an opportunity to grow product sales from this vendor.
 
 ## For those who want to clone this project and make your own use
 The only thing is to create your own .env file
