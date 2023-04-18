@@ -27,17 +27,6 @@ const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
 
-//modile required to upload file from browser
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, __dirname + "/uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, file.fieldname + "-" + Date.now() + "-" + file.originalname);
-  },
-});
-const uploadFile = multer({ storage: storage });
-
 //ejs module
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -273,7 +262,7 @@ app.post("/login", async (req, res, next) => {
       secure: true,
       expires: expirationTime,
     });
-  return res.redirect("/index.html");
+  return res.redirect("/");
 });
 
 /// verify token middleware
@@ -1143,6 +1132,25 @@ app.post("/createVendorInfo", async (req, res) => {
   } else {
     res.status(200).json({ err: "already exists" });
   }
+});
+
+app.get("/", (req, res) => {
+  res.render("index");
+});
+app.get("/invoiceFilter", (req, res) => {
+  res.render("invoiceFilter");
+});
+app.get("/upload", (req, res) => {
+  res.render("upload");
+});
+app.get("/productFilter", (req, res) => {
+  res.render("productFilter");
+});
+app.get("/vendorSelect", (req, res) => {
+  res.render("vendorSelect");
+});
+app.get("/purchaseOrderSelect", (req, res) => {
+  res.render("purchaseOrderSelect");
 });
 /// api point
 

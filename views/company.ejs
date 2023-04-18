@@ -4,130 +4,118 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Account</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="navBar.css" />
+
+    <link rel="stylesheet" href="table.css" />
+    <link rel="stylesheet" href="account.css" />
   </head>
   <body>
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>index</title>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
-          rel="stylesheet"
-        />
-        <link rel="stylesheet" href="navBar.css" />
+    <div class="wrapper">
+      <header>
+        <a href="/">Easy Product</a>
+        <form action="/search" class="search">
+          <input
+            type="search"
+            class="searchBar"
+            name="product"
+            placeholder="Search... "
+          />
+        </form>
+        <nav>
+          <ul>
+            <li>
+              <a href="cart"><i class="fa fa-shopping-cart"></i></a>
+            </li>
+            <li>
+              <a href="account"><i class="fa fa-user"></i></a>
+            </li>
+            <li>
+              <a href="logout"><i class="fa fa-sign-out"></i></a>
+            </li>
+            <li>
+              <a href="#"><i class="fa fa-bars" onclick="openNav()"></i></a>
+            </li>
+          </ul>
+        </nav>
+      </header>
+      <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
+          >&times;</a
+        >
+        <a href="/"> Home </a>
+        <a href="/dashboard"> Dashboard </a>
+        <a href="/productFilter"> Product </a>
+        <a href="/invoiceFilter"> Invoice </a>
+        <a href="/vendorSelect"> Vendor </a>
+        <a href="/purchaseOrderSelect"> Purchase Order </a>
+        <a href="/tag">Create Tags</a>
+        <a href="/vendorPage">Create Vendor</a>
+        <a href="/upload">Upload </a>
+      </div>
 
-        <link rel="stylesheet" href="table.css" />
-        <link rel="stylesheet" href="account.css" />
-      </head>
-      <body>
-        <div class="wrapper">
-          <header>
-            <a href="/index.html">Easy Product</a>
-            <form action="/search" class="search">
-              <input
-                type="search"
-                class="searchBar"
-                name="product"
-                placeholder="Search... "
-              />
-            </form>
-            <nav>
-              <ul>
-                <li>
-                  <a href="cart"><i class="fa fa-shopping-cart"></i></a>
-                </li>
-                <li>
-                  <a href="account"><i class="fa fa-user"></i></a>
-                </li>
-                <li>
-                  <a href="logout"><i class="fa fa-sign-out"></i></a>
-                </li>
-                <li>
-                  <a href="#"><i class="fa fa-bars" onclick="openNav()"></i></a>
-                </li>
-              </ul>
-            </nav>
-          </header>
-          <div id="mySidenav" class="sidenav">
-            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
-              >&times;</a
-            >
-            <a href="index.html"> Home </a>
-            <a href="dashboard"> Dashboard </a>
-            <a href="product.html"> Product </a>
-            <a href="invoice.html"> Invoice </a>
-            <a href="vendor.html"> Vendor </a>
-            <a href="purchaseOrder.html"> Purchase Order </a>
-            <a href="tag">Create Tags</a>
-            <a href="vendorPage">Create Vendor</a>
-
-            <a href="upload.html">Upload </a>
-          </div>
-
-          <script src="/script/navBar.js"></script>
-          <main>
-            <h1>Account Info</h1>
-            <div class="table-wrapper">
-              <table class="fl-table">
-                <tr>
-                  <td>User</td>
-                  <td>Email</td>
-                  <td>Company</td>
-                </tr>
-                <tr>
-                  <td id="user"><%= user.name %></td>
-                  <td id="emailAccount"><%= user.email %></td>
-                  <td id="company"><%= user.company %></td>
-                </tr>
-              </table>
-            </div>
-            <h1>Mamber List of <%= users[0].company%></h1>
-            <div class="table-wrapper">
-              <table class="fl-table" id="table">
-                <tr>
-                  <td>User Name</td>
-                  <td>Email</td>
-                  <td>Role</td>
-                </tr>
-                <% for( user of users ) { %>
-                <tr>
-                  <td><%= user.name %></td>
-                  <td><%= user.email %></td>
-                  <td><%= user.permission %></td>
-                </tr>
-                <% } %>
-              </table>
-            </div>
-
-            <h1>Invite New User</h1>
-            <div class="inputSession">
-              <input
-                type="email"
-                id="email"
-                placeholder="example@gmail.com"
-                autocomplete="off"
-                required="required"
-              />
-              <button type="submit" onclick="add()">
-                <span>Invite</span>
-              </button>
-              <small id="msg"></small>
-            </div>
-
-            <script src="/script/company.js"></script>
-          </main>
+      <script src="/script/navBar.js"></script>
+      <main>
+        <h1>Account Info</h1>
+        <div class="table-wrapper">
+          <table class="fl-table">
+            <tr>
+              <td>User</td>
+              <td>Email</td>
+              <td>Company</td>
+            </tr>
+            <tr>
+              <td id="user"><%= user.name %></td>
+              <td id="emailAccount"><%= user.email %></td>
+              <td id="company"><%= user.company %></td>
+            </tr>
+          </table>
         </div>
-      </body>
-    </html>
+        <h1>Mamber List of <%= users[0].company%></h1>
+        <div class="table-wrapper">
+          <table class="fl-table" id="table">
+            <tr>
+              <td>User Name</td>
+              <td>Email</td>
+              <td>Role</td>
+            </tr>
+            <% for( user of users ) { %>
+            <tr>
+              <td><%= user.name %></td>
+              <td><%= user.email %></td>
+              <td><%= user.permission %></td>
+            </tr>
+            <% } %>
+          </table>
+        </div>
+
+        <h1>Invite New User</h1>
+        <div class="inputSession">
+          <input
+            type="email"
+            id="email"
+            placeholder="example@gmail.com"
+            autocomplete="off"
+            required="required"
+          />
+          <button type="submit" onclick="add()">
+            <span>Invite</span>
+          </button>
+          <small id="msg"></small>
+        </div>
+
+        <script src="/script/company.js"></script>
+      </main>
+    </div>
   </body>
 </html>

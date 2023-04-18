@@ -16,12 +16,12 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
-    <title>invoice</title>
+    <title>Purchase Order</title>
   </head>
   <body>
     <div class="wrapper">
       <header>
-        <a href="/index.html">Easy Product</a>
+        <a href="/">Easy Product</a>
         <form action="/search" class="search">
           <input
             type="search"
@@ -51,27 +51,26 @@
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
           >&times;</a
         >
-        <a href="index.html"> Home </a>
-        <a href="dashboard"> Dashboard </a>
-        <a href="product.html"> Product </a>
-        <a href="invoice.html"> Invoice </a>
-        <a href="vendor.html"> Vendor </a>
-        <a href="purchaseOrder.html"> Purchase Order </a>
-        <a href="tag">Create Tags</a>
-        <a href="vendorPage">Create Vendor</a>
-
-        <a href="upload.html">Upload </a>
+        <a href="/"> Home </a>
+        <a href="/dashboard"> Dashboard </a>
+        <a href="/productFilter"> Product </a>
+        <a href="/invoiceFilter"> Invoice </a>
+        <a href="/vendorSelect"> Vendor </a>
+        <a href="/purchaseOrderSelect"> Purchase Order </a>
+        <a href="/tag">Create Tags</a>
+        <a href="/vendorPage">Create Vendor</a>
+        <a href="/upload">Upload </a>
       </div>
       <main>
         <div class="container">
-          <form id="form">
-            <div class="row">
-              <h2>1. Search By Invoice Number</h2>
+          <div class="row">
+            <h2>1. Search By Purchase Order Number</h2>
+            <form id="form">
               <input
                 type="text"
                 name="id"
-                id="invoiceID"
-                placeholder="Invoice Number"
+                id="poID"
+                placeholder="Purchase Order Number"
               />
               <input
                 type="submit"
@@ -82,22 +81,21 @@
                   margin-top: 20px;
                 "
               />
-
-              <p id="msg" style="color: red; display: none">
-                Invoice Number doesn't exist!
-              </p>
-            </div>
-          </form>
-          <form action="invoice" method="get">
-            <div class="row">
-              <h2>2. Filter</h2>
-              <div class="select">
+            </form>
+            <p id="msg" style="color: red; display: none">
+              PO Number doesn't exist!
+            </p>
+          </div>
+          <div class="row">
+            <h2>2. Filter</h2>
+            <form action="purchaseOrder" method="get">
+              <div class="input-group">
                 <select name="vendorName" id="Vendor">
-                  <option value="all">All Vendor</option>
+                  <option value="all">All Vendors</option>
                 </select>
                 <select name="status" id="status">
-                  <option value="unfinish">Unverified Invoice</option>
-                  <option value="finished">Verified Invoice</option>
+                  <option value="not receive">Not Received</option>
+                  <option value="received">Received</option>
                 </select>
               </div>
               <input
@@ -109,12 +107,12 @@
                   margin-top: 20px;
                 "
               />
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
+        <script src="/script/navBar.js"></script>
+        <script src="/script/poHtml.js"></script>
       </main>
     </div>
   </body>
-  <script src="/script/invoiceHtml.js"></script>
-  <script src="/script/navBar.js"></script>
 </html>
