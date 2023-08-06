@@ -56,6 +56,8 @@ baseUrl = Your base URL or domain
 
 ## Demo Account for this application
 
+### website URL: https://easyproduct.site/
+
 ### Account: demoproject845@gmail.com
 
 ### Password: demo123456
